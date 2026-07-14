@@ -8,7 +8,7 @@ QWidget {
 /* Table styling */
 QTableWidget {
     background-color: #2d2d2d;
-    gridline_color: #404040;
+    gridline-color: #404040;
     border: 1px solid #3c3c3c;
 }
 

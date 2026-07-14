@@ -24,12 +24,33 @@ class PageComponents(QWizardPage):
         self.spin.setMaximum(20)  # adjust if you want more
         self.spin.setValue(3)  # sensible default
         self.spin.valueChanged.connect(self._on_value_changed)
-        
+
 
         layout.addWidget(label)
         layout.addWidget(self.spin)
         self.setMinimumWidth(600)
         self.setLayout(layout)
+        wizard = self.wizard()
+    def showEvent(self, event):
+        super().showEvent(event)
+
+        wizard = self.wizard()
+        if wizard is not None:
+            wizard.resize(600, 500)
+
+            frame = wizard.frameGeometry()
+            center_point = wizard.screen().availableGeometry().center()
+            frame.moveCenter(center_point)
+            wizard.move(frame.topLeft())
+
+        if wizard is not None:
+            wizard.resize(600, 500)   # or your prefer`red size
+
+            frame = wizard.frameGeometry()
+            center_point = wizard.screen().availableGeometry().center()
+            frame.moveCenter(center_point)
+            wizard.move(frame.topLeft())
+
 
     def _on_value_changed(self, value: int):
         # live update if you want; final write happens in validatePage

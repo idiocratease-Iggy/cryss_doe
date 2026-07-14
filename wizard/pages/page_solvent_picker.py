@@ -12,18 +12,19 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 
 from models.solvent_manager import SolventManager
+from utils import normalize
 
 
 class PageSolventPicker(QWizardPage):
     def __init__(self, design_model):
         super().__init__()
         self.design = design_model
-
+        self.selected = []
         self.setTitle("Solvent Picker")
-        self.setMinimumSize(600, 500)
+        self.setMinimumSize(600, 620)
 
         # Load solvent list
-        self.manager = SolventManager("SolventList.xlsx")
+        self.manager = SolventManager(self.design.solvent_list_filename)
         self.manager.load()
 
         solvents = self.manager.solvents
@@ -39,14 +40,10 @@ class PageSolventPicker(QWizardPage):
         self.table.setColumnCount(4)
         self.table.setHorizontalHeaderLabels(["Select", "Solvent", "Select", "Solvent"])
 
-        # Number of rows = longest column
         rows = max(len(left), len(right))
         self.table.setRowCount(rows)
 
-        # Populate table
         for row in range(rows):
-
-            # LEFT COLUMN
             if row < len(left):
                 checkbox_left = QCheckBox()
                 widget_left = QWidget()
@@ -61,7 +58,6 @@ class PageSolventPicker(QWizardPage):
                 item_left.setFlags(item_left.flags() ^ Qt.ItemFlag.ItemIsEditable)
                 self.table.setItem(row, 1, item_left)
 
-            # RIGHT COLUMN
             if row < len(right):
                 checkbox_right = QCheckBox()
                 widget_right = QWidget()
@@ -76,18 +72,14 @@ class PageSolventPicker(QWizardPage):
                 item_right.setFlags(item_right.flags() ^ Qt.ItemFlag.ItemIsEditable)
                 self.table.setItem(row, 3, item_right)
 
-        # Table appearance polish
         self.table.verticalHeader().setVisible(False)
         self.table.setShowGrid(False)
-
         header = self.table.horizontalHeader()
         header.setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
 
-        # Row height
         for r in range(rows):
             self.table.setRowHeight(r, 28)
 
-        # Center the table on the page
         outer_layout = QVBoxLayout()
         outer_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
@@ -105,28 +97,41 @@ class PageSolventPicker(QWizardPage):
 
         self.setLayout(outer_layout)
 
-    # -----------------------------------------------------
-    # Store selected solvents in design model
-    # -----------------------------------------------------
-    def validatePage(self):
-        selected = []
+    def showEvent(self, event):
+        super().showEvent(event)
+
+        window = self.window()
+        if window is not None:
+            # Remove PCA page minimum size constraint
+            window.setMinimumSize(0, 0)
+
+            # Now resize normally
+            window.resize(600, 620)
+
+            frame = window.frameGeometry()
+            center_point = window.screen().availableGeometry().center()
+            frame.moveCenter(center_point)
+            window.move(frame.topLeft())
+
+    def validatePage(self) -> bool:
+        self.selected.clear()
 
         for row in range(self.table.rowCount()):
-            # LEFT COLUMN
             widget_left = self.table.cellWidget(row, 0)
             if widget_left:
-                checkbox_left = widget_left.layout().itemAt(0).widget()
-                if checkbox_left.isChecked():
-                    selected.append(self.table.item(row, 1).text().strip()) # Added .strip()
+                chk_left = widget_left.findChild(QCheckBox)
+                if chk_left and chk_left.isChecked():
+                    name_item = self.table.item(row, 1)
+                    if name_item:
+                        self.selected.append(normalize(name_item.text()))
 
-            # RIGHT COLUMN
             widget_right = self.table.cellWidget(row, 2)
             if widget_right:
-                checkbox_right = widget_right.layout().itemAt(0).widget()
-                if checkbox_right.isChecked():
-                    selected.append(self.table.item(row, 3).text().strip()) # Added .strip()
+                chk_right = widget_right.findChild(QCheckBox)
+                if chk_right and chk_right.isChecked():
+                    name_item = self.table.item(row, 3)
+                    if name_item:
+                        self.selected.append(normalize(name_item.text()))
 
-        print("DEBUG: Picker selections =", selected)
-
-        self.design.selected_solvents = selected
+        self.design.selected_solvents_pca = list(self.selected)
         return True

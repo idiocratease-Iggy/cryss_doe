@@ -1,24 +1,24 @@
 import openpyxl
-
+from utils import normalize
 
 class SolventManager:
     def __init__(self, filename: str):
         self.filename = filename
         self.solvents = []
-        self.n_rows = 0  # <-- IMPORTANT: define it here
 
     def load(self):
-        wb = openpyxl.load_workbook(self.filename)
+        wb = openpyxl.load_workbook(self.filename, data_only=True)
         ws = wb.active
 
-        # Read header row
-        headers = [cell.value for cell in ws[1]]
+        self.solvents = []
 
-        # Count rows excluding header
-        self.n_rows = ws.max_row - 1
-
-          # Load solvent entries
+        # Expect a single column: Name
         for row in ws.iter_rows(min_row=2, values_only=True):
-                   if any(val is not None and str(val).strip() != "" for val in row):
-                       entry = dict(zip(headers, row))
-                       self.solvents.append(entry)
+            name = row[0]
+
+            if not name:
+                continue
+
+            self.solvents.append({
+                "Name": normalize(name)
+            })
