@@ -102,16 +102,14 @@ class PageSolventPicker(QWizardPage):
 
         window = self.window()
         if window is not None:
-            # Remove PCA page minimum size constraint
-            window.setMinimumSize(0, 0)
-
-            # Now resize normally
+            window.setMinimumSize(600, 620)
             window.resize(600, 620)
 
             frame = window.frameGeometry()
             center_point = window.screen().availableGeometry().center()
             frame.moveCenter(center_point)
             window.move(frame.topLeft())
+
 
     def validatePage(self) -> bool:
         self.selected.clear()
@@ -134,4 +132,5 @@ class PageSolventPicker(QWizardPage):
                         self.selected.append(normalize(name_item.text()))
 
         self.design.selected_solvents_pca = list(self.selected)
+
         return True

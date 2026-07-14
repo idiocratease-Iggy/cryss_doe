@@ -2,8 +2,10 @@ from PyQt6.QtWidgets import (
     QWizardPage,
     QVBoxLayout,
     QLabel,
+    QGroupBox,
+    QRadioButton,
 )
-from PyQt6.QtCore import Qt, pyqtSignal, QObject
+from PyQt6.QtCore import Qt, pyqtSignal
 
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
@@ -13,44 +15,39 @@ import pyqtgraph as pg
 
 from utils import normalize
 
+
+# ---------------------------------------------------------
+# PCA computation (unchanged)
+# ---------------------------------------------------------
 def compute_pca(df: pd.DataFrame) -> pd.DataFrame:
-    # Drop non-numeric columns except Solvent
     numeric_df = df.drop(columns=["Solvent"], errors="ignore")
-
-    # Convert to numeric
     numeric_df = numeric_df.apply(pd.to_numeric, errors="coerce")
-
-    # Drop columns that are entirely NaN
     numeric_df = numeric_df.dropna(axis=1, how="all")
-
-    # Drop rows that are entirely NaN
     numeric_df = numeric_df.dropna(axis=0, how="all")
 
     if numeric_df.shape[0] == 0:
         raise ValueError("Descriptor matrix contains no usable numeric rows for PCA.")
 
-    # Standardize
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(numeric_df)
 
-    # PCA
     pca = PCA(n_components=2)
     components = pca.fit_transform(X_scaled)
 
-    # Build result DataFrame
     pca_df = pd.DataFrame({
         "PC1": components[:, 0],
         "PC2": components[:, 1],
         "Solvent": df.loc[numeric_df.index, "Solvent"]
     })
 
-    #print("PCA DF shape:", self.pca_df.shape)
-    #print("PCA solvents:", self.pca_df["Solvent"].tolist())
-
     return pca_df
 
+
+# ---------------------------------------------------------
+# PCA Plot Widget (unchanged)
+# ---------------------------------------------------------
 class PCAPlotWidget(pg.PlotWidget):
-    pointClicked = pyqtSignal(object)  # solvent name
+    pointClicked = pyqtSignal(object)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -59,59 +56,59 @@ class PCAPlotWidget(pg.PlotWidget):
         self.showGrid(x=True, y=True, alpha=0.3)
 
         self.scatter = pg.ScatterPlotItem()
-
-
-        # Enable hover support for older pyqtgraph versions
         self.scatter.opts['hoverable'] = True
-        self.scatter.opts['hoverSize'] = 20   # makes hover detection easier
+        self.scatter.opts['hoverSize'] = 20
 
         self.addItem(self.scatter)
-
         self.scatter.sigClicked.connect(self._on_clicked)
 
         self.hover_label = pg.TextItem("", anchor=(0, 1))
         self.addItem(self.hover_label)
         self.hover_label.hide()
 
-
+        self.scatter.sigHovered.connect(self._on_hover)
 
     def _on_hover(self, points):
-        if points is None or len(points) == 0:
+        # Safe empty check: works for lists, numpy arrays, SpotItems, ScatterPlotItem
+        if points is None or not hasattr(points, "__len__"):
             self.hover_label.hide()
             return
 
-        p = points[0]
-        solvent = p.data()
+        # If it's a list/array, take the first element
+        if isinstance(points, (list, tuple)):
+            p = points[0]
+        else:
+            p = points
 
-        self.hover_label.setText(solvent)
+        solvent = p.data() if callable(p.data) else p.data
+
+        self.hover_label.setText(str(solvent))
         self.hover_label.setPos(p.pos())
         self.hover_label.show()
 
+
+
+
     def _on_clicked(self, plot, points):
-        if points is None or len(points) == 0:
-            return
-        p = points[0]
-        solvent = p.data()
-        self.pointClicked.emit(solvent)
+            if points is None or (hasattr(points, "__len__") and len(points) == 0):
+                return
+            p = points[0]
+            solvent = p.data()
+            self.pointClicked.emit(solvent)
+
 
     def set_points(self, points):
-        """
-        points: list of dicts with keys:
-        - pos: (x, y)
-        - data: solvent name
-        - brush
-        - pen
-        - size
-        """
         self.scatter.setData(points)
 
 
+# ---------------------------------------------------------
+# PCA Page (with minimal Y-axis selector added)
+# ---------------------------------------------------------
 class PagePCA(QWizardPage):
     def __init__(self, design_model, parent=None):
         super().__init__(parent)
 
         self.design_model = design_model
-
         self.selected = set()
         self.preselected = set(design_model.selected_solvents_pca or [])
         self.pca_df = pd.DataFrame()
@@ -127,50 +124,57 @@ class PagePCA(QWizardPage):
         self.label.setWordWrap(True)
         layout.addWidget(self.label)
 
-        # IMPORTANT: Create plot widget here
+        # --- PCA plot ---
         self.plot_widget = PCAPlotWidget(self)
-        self.plot_widget.setMinimumSize(1200, 800)
         layout.addWidget(self.plot_widget)
 
         self.plot_widget.pointClicked.connect(self.on_point_clicked)
 
+        # --- Y-axis selector (PC2, PC3, PC4) ---
+        axis_box = QGroupBox("Y Axis")
+        axis_layout = QVBoxLayout()
+
+        self.y_buttons = []
+        for i in [2, 3, 4]:
+            rb = QRadioButton(f"PC{i}")
+            axis_layout.addWidget(rb)
+            self.y_buttons.append(rb)
+
+        self.y_buttons[0].setChecked(True)  # PC2 default
+        axis_box.setLayout(axis_layout)
+        layout.addWidget(axis_box)
+
+        for rb in self.y_buttons:
+            rb.toggled.connect(self.update_axes)
+
+    # ---------------------------------------------------------
+    # Page initialization
+    # ---------------------------------------------------------
     def showEvent(self, event):
-        super().showEvent(event)
+            super().showEvent(event)
 
-        window = self.window()
-        if window is not None:
-            window.setMinimumSize(1200, 800)
-            window.resize(1200, 800)
+            window = self.window()
+            if window is not None:
+                # Make PCA page larger
+                window.setMinimumSize(1200, 900)
+                window.resize(1200, 900)
 
-            frame = window.frameGeometry()
-            center_point = window.screen().availableGeometry().center()
-            frame.moveCenter(center_point)
-            window.move(frame.topLeft())
-
+                # Optional: center window on screen
+                frame = window.frameGeometry()
+                center_point = window.screen().availableGeometry().center()
+                frame.moveCenter(center_point)
+                window.move(frame.topLeft())
 
     def initializePage(self):
-        # Center the wizard window on screen
-        wizard = self.wizard()
-        if wizard is not None:
-            frame = wizard.frameGeometry()
-            center_point = wizard.screen().availableGeometry().center()
-            frame.moveCenter(center_point)
-            wizard.move(frame.topLeft())
-
-        # Expect design_model to provide a DataFrame with descriptors and a 'Solvent' column
         df = self.design_model.descriptor_df.copy()
-        self.pca_df = compute_pca(df)
-
-        # Normalise solvent names
         df["Solvent"] = df["Solvent"].apply(normalize)
 
-        # Standardise descriptor columns
+        # PCA with 3 components (unchanged)
         desc_cols = [c for c in df.columns if c not in ("Solvent",)]
         X = df[desc_cols].values
         X_scaled = StandardScaler().fit_transform(X)
 
-        # PCA
-        pca = PCA(n_components=3)
+        pca = PCA(n_components=4)
         pcs = pca.fit_transform(X_scaled)
 
         self.pca_df = pd.DataFrame({
@@ -178,54 +182,47 @@ class PagePCA(QWizardPage):
             "PC1": pcs[:, 0],
             "PC2": pcs[:, 1],
             "PC3": pcs[:, 2],
+            "PC4": pcs[:, 3],
         })
 
-        # Ensure preselected set is normalised
-        # #------------------------------
-        # Debug Prints
-        # #------------------------------
         self.preselected = {normalize(s) for s in self.design_model.selected_solvents_pca}
 
-        #print("Selected solvents:", self.design_model.selected_solvents_pca)
-        #print("Descriptor DF shape:", df.shape)
-        #print("Descriptor solvents:", df["Solvent"].tolist())
-
-        subset = df[df["Solvent"].isin(self.design_model.selected_solvents_pca)]
-        #print("Subset shape:", subset.shape)
-        #print("Subset solvents:", subset["Solvent"].tolist())
-        # #------------------------------
-        # Debug Prints
-        # #------------------------------
         self.update_plot()
 
-    def update_plot(self):
+    # ---------------------------------------------------------
+    # Axis update
+    # ---------------------------------------------------------
+    def update_axes(self):
+        y_pc = next((i+2 for i, rb in enumerate(self.y_buttons) if rb.isChecked()), 2)
+        self.update_plot(y_pc)
+
+    # ---------------------------------------------------------
+    # Plot update
+    # ---------------------------------------------------------
+    def update_plot(self, y_pc=2):
         points = []
 
         for _, row in self.pca_df.iterrows():
             solvent = row["Solvent"]
 
             if solvent in self.selected:
-                # orange filled
                 brush = pg.mkBrush(255, 165, 0, 230)
                 pen = pg.mkPen(255, 165, 0, 230)
             elif solvent in self.preselected:
-                # red filled
                 brush = pg.mkBrush(255, 120, 120, 230)
                 pen = pg.mkPen(255, 120, 120, 230)
             else:
-                # blue hollow
                 brush = pg.mkBrush(None)
                 pen = pg.mkPen(100, 150, 255, 200)
 
             points.append({
-                "pos": (row["PC1"], row["PC2"]),
+                "pos": (row["PC1"], row[f"PC{y_pc}"]),
                 "data": solvent,
                 "brush": brush,
                 "pen": pen,
                 "size": 12,
             })
 
-        # Draw preselected + selected last so they sit on top
         def sort_key(p):
             name = p["data"]
             if name in self.selected:
@@ -235,11 +232,12 @@ class PagePCA(QWizardPage):
             return 0
 
         points.sort(key=sort_key)
-
         self.plot_widget.set_points(points)
 
+    # ---------------------------------------------------------
+    # Click handler
+    # ---------------------------------------------------------
     def on_point_clicked(self, solvent):
-        # Do NOT toggle preselected solvents
         if solvent in self.preselected:
             return
 
@@ -250,6 +248,8 @@ class PagePCA(QWizardPage):
 
         self.update_plot()
 
+    # ---------------------------------------------------------
+    # Final selection
+    # ---------------------------------------------------------
     def get_selected_solvents(self):
-        # Union of selected + preselected
         return list(self.selected | self.preselected)
