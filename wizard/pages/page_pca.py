@@ -51,13 +51,16 @@ class PCAPlotWidget(pg.PlotWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-
+        self.point_data = []   # ⭐ MUST exist here
         self.setBackground("k")
         self.showGrid(x=True, y=True, alpha=0.3)
 
-        self.scatter = pg.ScatterPlotItem()
+     #   self.scatter = pg.ScatterPlotItem()
+        self.scatter = pg.ScatterPlotItem(symbol='o')
         self.scatter.opts['hoverable'] = True
         self.scatter.opts['hoverSize'] = 20
+
+
 
         self.addItem(self.scatter)
         self.scatter.sigClicked.connect(self._on_clicked)
@@ -69,36 +72,60 @@ class PCAPlotWidget(pg.PlotWidget):
         self.scatter.sigHovered.connect(self._on_hover)
 
     def _on_hover(self, points):
-        # Safe empty check: works for lists, numpy arrays, SpotItems, ScatterPlotItem
         if points is None or not hasattr(points, "__len__"):
             self.hover_label.hide()
             return
 
-        # If it's a list/array, take the first element
         if isinstance(points, (list, tuple)):
             p = points[0]
         else:
             p = points
 
         solvent = p.data() if callable(p.data) else p.data
-
         self.hover_label.setText(str(solvent))
         self.hover_label.setPos(p.pos())
         self.hover_label.show()
 
-
-
-
     def _on_clicked(self, plot, points):
-            if points is None or (hasattr(points, "__len__") and len(points) == 0):
-                return
-            p = points[0]
-            solvent = p.data()
-            self.pointClicked.emit(solvent)
+        if points is None or len(points) == 0:
+            return
 
+        p = points[0]
+        idx = p.index()   # ⭐ ALWAYS works
+
+        solvent = self.point_data[idx]   # ⭐ MUST use this
+        solvent = str(solvent)
+
+        print("CLICK:", solvent)
+
+        self.pointClicked.emit(solvent)
 
     def set_points(self, points):
-        self.scatter.setData(points)
+        xs = [p["pos"][0] for p in points]
+        ys = [p["pos"][1] for p in points]
+        brushes = [p["brush"] for p in points]
+        pens = [p["pen"] for p in points]
+        sizes = [p["size"] for p in points]
+
+        # ⭐ MUST assign solvent names here
+        self.point_data = [p["data"] for p in points]
+
+        self.scatter.setData(
+            x=xs,
+            y=ys,
+            brush=brushes,
+            pen=pens,
+            size=sizes,
+            data=self.point_data,   # hover uses this
+            symbol='o',
+            clickable=True
+        )
+
+
+
+
+     #   self.scatter.addPoints(spots)
+
 
 
 # ---------------------------------------------------------
@@ -189,6 +216,19 @@ class PagePCA(QWizardPage):
 
         self.update_plot()
 
+    def on_point_clicked(self, solvent):
+        if solvent in self.preselected:
+            return
+
+        if solvent in self.selected:
+            self.selected.remove(solvent)
+        else:
+            self.selected.add(solvent)
+
+        # Determine selected axis
+        y_pc = next((i+2 for i, rb in enumerate(self.y_buttons) if rb.isChecked()), 2)
+        self.update_plot(y_pc)
+
     # ---------------------------------------------------------
     # Axis update
     # ---------------------------------------------------------
@@ -234,19 +274,7 @@ class PagePCA(QWizardPage):
         points.sort(key=sort_key)
         self.plot_widget.set_points(points)
 
-    # ---------------------------------------------------------
-    # Click handler
-    # ---------------------------------------------------------
-    def on_point_clicked(self, solvent):
-        if solvent in self.preselected:
-            return
 
-        if solvent in self.selected:
-            self.selected.remove(solvent)
-        else:
-            self.selected.add(solvent)
-
-        self.update_plot()
 
     # ---------------------------------------------------------
     # Final selection
