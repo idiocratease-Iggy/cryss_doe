@@ -31,11 +31,13 @@ class PageComponents(QWizardPage):
         self.setMinimumWidth(600)
         self.setLayout(layout)
         wizard = self.wizard()
+
     def showEvent(self, event):
         super().showEvent(event)
 
         wizard = self.wizard()
         if wizard is not None:
+            wizard.setMinimumSize(600, 500)   # ⭐ critical
             wizard.resize(600, 500)
 
             frame = wizard.frameGeometry()
@@ -43,8 +45,9 @@ class PageComponents(QWizardPage):
             frame.moveCenter(center_point)
             wizard.move(frame.topLeft())
 
+
         if wizard is not None:
-            wizard.resize(600, 500)   # or your prefer`red size
+        #    wizard.resize(600, 500)   # or your prefer`red size
 
             frame = wizard.frameGeometry()
             center_point = wizard.screen().availableGeometry().center()
