@@ -71,6 +71,14 @@ class PCAPlotWidget(pg.PlotWidget):
 
         self.scatter.sigHovered.connect(self._on_hover)
 
+
+    def set_axis_labels(self, pc_y: int):
+        # X axis always PC1
+        self.setLabel('bottom', f"Principal Component 1")
+
+        # Y axis depends on radio button
+        self.setLabel('left', f"Principal Component {pc_y}")
+
     def _on_hover(self, points):
         if points is None or not hasattr(points, "__len__"):
             self.hover_label.hide()
@@ -174,6 +182,7 @@ class PagePCA(QWizardPage):
         for rb in self.y_buttons:
             rb.toggled.connect(self.update_axes)
 
+
     # ---------------------------------------------------------
     # Page initialization
     # ---------------------------------------------------------
@@ -234,14 +243,28 @@ class PagePCA(QWizardPage):
     # ---------------------------------------------------------
     def update_axes(self):
         y_pc = next((i+2 for i, rb in enumerate(self.y_buttons) if rb.isChecked()), 2)
+
+        # Update axis labels
+        self.plot_widget.set_axis_labels(y_pc)
+
+        # Update scatter positions
         self.update_plot(y_pc)
+
 
     # ---------------------------------------------------------
     # Plot update
     # ---------------------------------------------------------
+    def _on_pc_selected(self, pc_y):
+        # Update the PCA plot axis labels
+        self.pca_plot.set_axis_labels(pc_y)
+
+        # Recompute the scatter positions for the new PC
+        self.update_pca_points(pc_y)
+
+
     def update_plot(self, y_pc=2):
         points = []
-
+        self.plot_widget.set_axis_labels(y_pc)
         for _, row in self.pca_df.iterrows():
             solvent = row["Solvent"]
 
