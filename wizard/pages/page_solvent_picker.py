@@ -75,10 +75,31 @@ class PageSolventPicker(QWizardPage):
         self.table.verticalHeader().setVisible(False)
         self.table.setShowGrid(False)
         header = self.table.horizontalHeader()
-        header.setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        # Set the "Select" columns (0 and 2) to a fixed width
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.Fixed)
+        header.setSectionResizeMode(2, QHeaderView.ResizeMode.Fixed)
+        header.resizeSection(0, 60)
+        header.resizeSection(2, 60)
+        # Set the "Solvent" columns (1 and 3) to stretch
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
 
         for r in range(rows):
             self.table.setRowHeight(r, 28)
+
+        # Styling the table to look more like a contained frame
+        self.table.setStyleSheet("""
+            QTableWidget {
+                background-color: #2b2b2b;
+                border: 1px solid #444;
+                gridline-color: #444;
+            }
+            QHeaderView::section {
+                background-color: #3c3c3c;
+                padding: 4px;
+                border: 1px solid #444;
+            }
+        """)
 
         outer_layout = QVBoxLayout()
         outer_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
@@ -87,14 +108,22 @@ class PageSolventPicker(QWizardPage):
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         outer_layout.addWidget(title)
 
-        center_widget = QWidget()
+        # Create a container widget to act as the "frame"
+        container_widget = QWidget()
+        # Removed setFixedWidth so it can adapt to the window size
+        container_layout = QVBoxLayout(container_widget)
+        # Added generous margins here to create the "framed" look within the window
+        container_layout.setContentsMargins(20, 10, 20, 10)
+        container_layout.setSpacing(0)
+        container_layout.addWidget(self.table)
+
         center_layout = QHBoxLayout()
         center_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        center_widget.setLayout(center_layout)
+        # Give the container some breathing room within the center layout
+        center_layout.setContentsMargins(20, 0, 20, 0)
+        center_layout.addWidget(container_widget)
 
-        center_layout.addWidget(self.table)
-        outer_layout.addWidget(center_widget)
-
+        outer_layout.addLayout(center_layout)
         self.setLayout(outer_layout)
 
     def showEvent(self, event):
