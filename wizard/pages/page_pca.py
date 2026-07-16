@@ -195,19 +195,8 @@ class PagePCA(QWizardPage):
     # Page initialization
     # ---------------------------------------------------------
     def showEvent(self, event):
-            super().showEvent(event)
-
-            window = self.window()
-            if window is not None:
-                # Make PCA page larger
-                window.setMinimumSize(1200, 900)
-                window.resize(1200, 900)
-
-                # Optional: center window on screen
-                frame = window.frameGeometry()
-                center_point = window.screen().availableGeometry().center()
-                frame.moveCenter(center_point)
-                window.move(frame.topLeft())
+        super().showEvent(event)
+        # Removed hardcoded window resizing to allow other pages to control size.
 
     def initializePage(self):
         df = self.design_model.descriptor_df.copy()
@@ -312,3 +301,11 @@ class PagePCA(QWizardPage):
     # ---------------------------------------------------------
     def get_selected_solvents(self):
         return list(self.selected | self.preselected)
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        window = self.window()
+        if window is not None:
+            # Restore PCA page to its larger size
+            window.setMinimumSize(1200, 900)
+            window.resize(1200, 900)

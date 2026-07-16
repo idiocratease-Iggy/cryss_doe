@@ -1,5 +1,6 @@
 from PyQt6.QtWidgets import QWizard
 
+
 from wizard.pages.page_components import PageComponents
 from wizard.pages.page_pca import PagePCA
 from wizard.pages.page_plate_format import PagePlateFormat
