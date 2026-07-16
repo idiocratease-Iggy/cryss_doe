@@ -92,11 +92,11 @@ class PageSaltFormers(QWizardPage):
         super().showEvent(event)
         wizard = self.wizard()
         if wizard is not None:
-            wizard.setMinimumSize(900, 600)
-            wizard.resize(900, 600)
+            wizard.setMinimumSize(900, 850)
+            wizard.resize(900, 850)
 
-        self.salt_free_checkbox.setVisible(any_selected)
-
+        # Call the helper method you already wrote!
+        self.update_salt_free_visibility()
 
 
     def validatePage(self) -> bool:

@@ -26,7 +26,7 @@ class DesignWizard(QWizard):
         sfm = SaltFormerManager(self.model.salt_former_filename)
         self.model.salt_former_data = sfm.load()
 
-        print("Loaded salt former data:", self.model.salt_former_data)
+    #    print("Loaded salt former data:", self.model.salt_former_data)
 
         self.setWindowTitle("Mixture-centric DoE Wizard")
 

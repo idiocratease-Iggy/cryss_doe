@@ -6,14 +6,14 @@ class SaltFormerManager:
 
     def load(self):
         wb = openpyxl.load_workbook(self.filename)
-        print("Workbook sheets:", wb.sheetnames)
+     #   print("Workbook sheets:", wb.sheetnames)
 
         # IMPORTANT: select the correct sheet
         ws = wb["SaltFormerList"]   # ← change this to match your sheet name
 
-        print("Active sheet title:", ws.title)
-        print("Max row:", ws.max_row)
-        print("Max column:", ws.max_column)
+     #   print("Active sheet title:", ws.title)
+     #   print("Max row:", ws.max_row)
+     #   print("Max column:", ws.max_column)
 
         acids = []
         chiral_acids = []
@@ -21,7 +21,7 @@ class SaltFormerManager:
         chiral_bases = []
 
         for row in ws.iter_rows(min_row=2, values_only=True):
-            print("Row read:", row)
+        #    print("Row read:", row)
 
             if row is None:
                 continue

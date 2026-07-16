@@ -104,7 +104,7 @@ class PCAPlotWidget(pg.PlotWidget):
         solvent = self.point_data[idx]   # ⭐ MUST use this
         solvent = str(solvent)
 
-        print("CLICK:", solvent)
+     #   print("CLICK:", solvent)
 
         self.pointClicked.emit(solvent)
 
