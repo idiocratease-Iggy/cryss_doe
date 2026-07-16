@@ -152,10 +152,18 @@ class PagePCA(QWizardPage):
 
         layout = QVBoxLayout(self)
 
-        self.label = QLabel(
-            "Use the PCA plot to select or deselect solvents.\n"
-            "Selected solvents will be carried forward into the mixture design."
+        # Using HTML for multi-colored text
+        # Orange: #FFA500, Red: #FF7878
+        text = (
+            "Use the PCA plot to select or deselect solvents more exotic solvents [shown in <font color='#FFA500'>Orange</font>]; "
+            "good for experimental diversity.<br>"
+            "Selected solvents will be carried forward into the mixture design [nb typical solvents are selected on the previous "
+            "Solvent Picker dialogue are in <font color='#FF7878'>Red</font>].<br>"
+            "You can adjust the plot by right click and drag to zoom, or left click and drag to pan. "
+            "Hover over points to see solvent names."
         )
+
+        self.label = QLabel(text)
         self.label.setWordWrap(True)
         layout.addWidget(self.label)
 

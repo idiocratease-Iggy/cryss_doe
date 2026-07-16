@@ -23,6 +23,7 @@ class PageComponents(QWizardPage):
         self.spin.setMinimum(1)
         self.spin.setMaximum(20)  # adjust if you want more
         self.spin.setValue(3)  # sensible default
+        self.spin.setFixedWidth(60)  # Fix: Set a reasonable fixed width so it doesn't stretch across the screen
         self.spin.valueChanged.connect(self._on_value_changed)
 
 

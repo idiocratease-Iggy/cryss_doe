@@ -26,13 +26,14 @@ class PageVolumeLevels(QWizardPage):
             "<b>Guidance:</b><br>"
             "CRYSS experiments should be run <i>highly concentrated</i>, using low solvent volumes "
             "relative to the solid mass. This ensures that after equilibration, both phases "
-            "(solid + mother liquor) contain a partially purified mixture.<br><br>"
+            "(solid + mother liquor) contain a partially purified mixture.<br>"
             "If an experiment produces no solid phase, or a solid phase consisting of a pure compound, "
-            "it provides no useful partitioning information for CRYSS.<br><br>"
+            "it provides no useful partitioning information for CRYSS.<br>"
             "Using multiple solvent volumes for the same starting composition improves solubility "
             "modelling and partitioning accuracy."
         )
         guidance.setWordWrap(True)
+        # Reduce vertical spacing of guidance text slightly by removing extra <br> tags where possible
 
         # ------------------------------
         # Number of solvent volume levels
@@ -42,6 +43,7 @@ class PageVolumeLevels(QWizardPage):
         self.spin_volumes.setMinimum(1)
         self.spin_volumes.setMaximum(10)
         self.spin_volumes.setValue(2)
+        self.spin_volumes.setFixedWidth(60)
 
         volumes_layout = QHBoxLayout()
         volumes_layout.addWidget(volumes_label)
@@ -67,6 +69,7 @@ class PageVolumeLevels(QWizardPage):
         self.combo_units = QComboBox()
         self.combo_units.addItems(["mL", "µL", "L", "dL", "dm³"])
         self.combo_units.setCurrentText("mL")
+        self.combo_units.setFixedWidth(80)
 
         unit_layout = QHBoxLayout()
         unit_layout.addWidget(unit_label)
@@ -95,6 +98,7 @@ class PageVolumeLevels(QWizardPage):
         self.spin_replicate_pct.setRange(0, 100)
         self.spin_replicate_pct.setSuffix("%")
         self.spin_replicate_pct.setValue(0)
+        self.spin_replicate_pct.setFixedWidth(60)
 
         replicate_layout = QHBoxLayout()
         replicate_layout.addWidget(replicate_label)
@@ -149,32 +153,12 @@ class PageVolumeLevels(QWizardPage):
         # ------------------------------
         layout = QVBoxLayout()
         layout.addWidget(guidance)
-        layout.addSpacing(15)
+        layout.addSpacing(10)
         layout.addLayout(volumes_layout)
         layout.addWidget(mode_group)
         layout.addLayout(unit_layout)
-        layout.addSpacing(20)
+        layout.addSpacing(10)
         layout.addWidget(replicate_group)
         layout.addStretch()
 
         self.setLayout(layout)
-
-    # ------------------------------
-    # Save data into the model
-    # ------------------------------
-    def validatePage(self):
-        self.model.number_of_volume_levels = self.spin_volumes.value()
-
-        if self.radio_absolute.isChecked():
-            self.model.volume_mode = "absolute"
-            self.model.volume_unit = self.combo_units.currentText()
-        else:
-            self.model.volume_mode = "relative"
-            self.model.volume_unit = "mL/g"
-
-        self.model.include_replicates = self.chk_replicates.isChecked()
-        self.model.replicate_percentage = (
-            self.spin_replicate_pct.value() if self.chk_replicates.isChecked() else 0
-        )
-
-        return True
