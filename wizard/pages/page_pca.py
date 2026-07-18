@@ -55,7 +55,7 @@ class PCAPlotWidget(pg.PlotWidget):
         self.setBackground("k")
         self.showGrid(x=True, y=True, alpha=0.3)
 
-     #   self.scatter = pg.ScatterPlotItem()
+
         self.scatter = pg.ScatterPlotItem(symbol='o')
         self.scatter.opts['hoverable'] = True
         self.scatter.opts['hoverSize'] = 20

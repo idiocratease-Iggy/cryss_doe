@@ -16,34 +16,39 @@ from utils import normalize
 
 
 class PageSolventPicker(QWizardPage):
+    """
+    Allows the user to select solvents from a pre-loaded database.
+    Uses a two-column table layout for efficient browsing of large lists.
+    """
     def __init__(self, design_model):
         super().__init__()
         self.design = design_model
         self.selected = []
         self.setTitle("Solvent Picker")
         self.setMinimumSize(700, 760)
-
-        # Load solvent list
+    
+        # Load solvent list from the file path provided in the DesignModel
         self.manager = SolventManager(self.design.solvent_list_filename)
         self.manager.load()
-
+    
         solvents = self.manager.solvents
         n = len(solvents)
-
-        # Split into two columns
+    
+        # Split into two columns to optimize vertical space on the screen
         half = (n + 1) // 2
         left = solvents[:half]
         right = solvents[half:]
-
-        # Create table with 4 columns
+    
+        # Create a table with 4 columns: [Checkbox, Name, Checkbox, Name]
         self.table = QTableWidget()
         self.table.setColumnCount(4)
         self.table.setHorizontalHeaderLabels(["Select", "Solvent", "Select", "Solvent"])
-
+    
         rows = max(len(left), len(right))
         self.table.setRowCount(rows)
-
+    
         for row in range(rows):
+            # Populate Left Column
             if row < len(left):
                 checkbox_left = QCheckBox()
                 widget_left = QWidget()
@@ -53,11 +58,13 @@ class PageSolventPicker(QWizardPage):
                 hbox_left.setContentsMargins(0, 0, 0, 0)
                 widget_left.setLayout(hbox_left)
                 self.table.setCellWidget(row, 0, widget_left)
-
+    
                 item_left = QTableWidgetItem(left[row]["Name"])
+                # Prevent users from editing the solvent names directly in the table
                 item_left.setFlags(item_left.flags() ^ Qt.ItemFlag.ItemIsEditable)
                 self.table.setItem(row, 1, item_left)
-
+    
+            # Populate Right Column
             if row < len(right):
                 checkbox_right = QCheckBox()
                 widget_right = QWidget()
@@ -67,48 +74,49 @@ class PageSolventPicker(QWizardPage):
                 hbox_right.setContentsMargins(0, 0, 0, 0)
                 widget_right.setLayout(hbox_right)
                 self.table.setCellWidget(row, 2, widget_right)
-
+    
                 item_right = QTableWidgetItem(right[row]["Name"])
+                # Prevent users from editing the solvent names directly in the table
                 item_right.setFlags(item_right.flags() ^ Qt.ItemFlag.ItemIsEditable)
                 self.table.setItem(row, 3, item_right)
-
+    
         self.table.verticalHeader().setVisible(False)
         self.table.setShowGrid(False)
         header = self.table.horizontalHeader()
-        # Set the "Select" columns (0 and 2) to a fixed width
+        # Set the "Select" columns (0 and 2) to a fixed width for consistency
         header.setSectionResizeMode(0, QHeaderView.ResizeMode.Fixed)
         header.setSectionResizeMode(2, QHeaderView.ResizeMode.Fixed)
         header.resizeSection(0, 60)
         header.resizeSection(2, 60)
-        # Set the "Solvent" columns (1 and 3) to stretch
+        # Set the "Solvent" columns (1 and 3) to stretch and fill available space
         header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
         header.setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
-
+    
         for r in range(rows):
             self.table.setRowHeight(r, 28)
-
-        # Styling the table to look more like a contained frame
+    
+        # Styling the table to match the application's dark theme
         self.table.setStyleSheet("""
-            QTableWidget {
-                background-color: #2b2b2b;
-                border: 1px solid #444;
-                gridline-color: #444;
-            }
-            QHeaderView::section {
-                background-color: #3c3c3c;
-                padding: 4px;
-                border: 1px solid #444;
-            }
+        QTableWidget {
+            background-color: #2b2b2b;
+            border: 1px solid #444;
+            gridline-color: #444;
+        }
+        QHeaderView::section {
+            background-color: #3c3c3c;
+            padding: 4px;
+            border: 1px solid #444;
+        }
         """)
-
+    
         outer_layout = QVBoxLayout()
         outer_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-
+    
         title = QLabel("Select Solvents")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         outer_layout.addWidget(title)
-
-        # Create a container widget to act as the "frame"
+    
+        # Create a container widget to act as the "frame" for the table
         container_widget = QWidget()
         # Removed setFixedWidth so it can adapt to the window size
         container_layout = QVBoxLayout(container_widget)
@@ -116,42 +124,47 @@ class PageSolventPicker(QWizardPage):
         container_layout.setContentsMargins(20, 10, 20, 10)
         container_layout.setSpacing(0)
         container_layout.addWidget(self.table)
-
+    
         center_layout = QHBoxLayout()
         center_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         # Give the container some breathing room within the center layout
         center_layout.setContentsMargins(20, 0, 20, 0)
         center_layout.addWidget(container_widget)
-
+    
         outer_layout.addLayout(center_layout)
         self.setLayout(outer_layout)
-
+    
     def showEvent(self, event):
+        """Centers the wizard window on the screen and sets a standard size."""
         super().showEvent(event)
-
+    
         window = self.window()
         if window is not None:
             window.setMinimumSize(700, 760)
             window.resize(700, 760)
-
+    
             frame = window.frameGeometry()
             center_point = window.screen().availableGeometry().center()
             frame.moveCenter(center_point)
             window.move(frame.topLeft())
-
-
+    
+    
     def validatePage(self) -> bool:
+        """Collects all checked solvents and updates the DesignModel."""
         self.selected.clear()
-
+    
         for row in range(self.table.rowCount()):
+            # Check Left Column
             widget_left = self.table.cellWidget(row, 0)
             if widget_left:
                 chk_left = widget_left.findChild(QCheckBox)
                 if chk_left and chk_left.isChecked():
                     name_item = self.table.item(row, 1)
                     if name_item:
+                        # Note: normalize() is used to ensure consistent naming
                         self.selected.append(normalize(name_item.text()))
-
+    
+            # Check Right Column
             widget_right = self.table.cellWidget(row, 2)
             if widget_right:
                 chk_right = widget_right.findChild(QCheckBox)
@@ -159,7 +172,8 @@ class PageSolventPicker(QWizardPage):
                     name_item = self.table.item(row, 3)
                     if name_item:
                         self.selected.append(normalize(name_item.text()))
-
-        self.design.selected_solvents_pca = list(self.selected)
-
+    
+        # Update the model with a unique list of selected solvents
+        self.design.selected_solvents_pca = list(set(self.selected))
+    
         return True

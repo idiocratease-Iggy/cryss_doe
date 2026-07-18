@@ -7,6 +7,10 @@ def normalize(name: str) -> str:
     - Unicode NFC
     - Strip whitespace
     - Replace non-breaking spaces
+
+    Normalizes solvent/component names to avoid Excel Unicode inconsistencies
+    (NBSP, combining accents, stray whitespace). Ensures consistent matching across
+    descriptor matrices, picker lists, and PCA.”
     """
     if not isinstance(name, str):
         return name

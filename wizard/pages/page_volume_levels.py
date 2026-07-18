@@ -17,7 +17,6 @@ class PageVolumeLevels(QWizardPage):
         super().__init__()
 
         self.model = model
-    #    print("Minimum size hint:", self.minimumSizeHint())
 
         self.setTitle("Solvent Volume Levels")
 
@@ -164,6 +163,9 @@ class PageVolumeLevels(QWizardPage):
         layout.addStretch()
 
         self.setLayout(layout)
+        # ------------------------------
+        # Window sizing and centering
+        # ------------------------------
 
     def showEvent(self, event):
             super().showEvent(event)
