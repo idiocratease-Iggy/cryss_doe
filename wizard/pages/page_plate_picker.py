@@ -112,6 +112,8 @@ class PlatePreview(QWidget):
 class PagePlatePicker(QWizardPage):
     def __init__(self, model):
         super().__init__()
+        self.setTitle("Select Plate Format")
+
         self.model = model
 
         self.setTitle("Select Plate Format")

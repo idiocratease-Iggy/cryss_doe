@@ -15,6 +15,8 @@ from PyQt6.QtCore import Qt
 class PageVolumeLevels(QWizardPage):
     def __init__(self, model):
         super().__init__()
+        self.setTitle("Define Volume Levels")
+
 
         self.model = model
 

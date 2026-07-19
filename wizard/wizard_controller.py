@@ -1,4 +1,7 @@
 from PyQt6.QtWidgets import QWizard
+from PyQt6.QtGui import QPalette
+from PyQt6.QtCore import Qt
+
 
 from wizard.pages.page_components import PageComponents
 from wizard.pages.page_solvent_picker import PageSolventPicker
@@ -14,6 +17,17 @@ from models.design_model import DesignModel
 class DesignWizard(QWizard):
     def __init__(self, parent=None):
         super().__init__(parent)
+
+        self.setWindowTitle("Mixture-centric DoE Wizard")
+        self.setWizardStyle(QWizard.WizardStyle.ModernStyle)
+
+
+        pal = self.palette()
+        pal.setColor(QPalette.ColorRole.WindowText, Qt.GlobalColor.white)
+        pal.setColor(QPalette.ColorRole.Text, Qt.GlobalColor.white)
+        pal.setColor(QPalette.ColorRole.ButtonText, Qt.GlobalColor.white)
+        pal.setColor(QPalette.ColorRole.HighlightedText, Qt.GlobalColor.white)
+        self.setPalette(pal)
 
         self.model = DesignModel()
 

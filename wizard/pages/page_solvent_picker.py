@@ -22,6 +22,8 @@ class PageSolventPicker(QWizardPage):
     """
     def __init__(self, design_model):
         super().__init__()
+        self.setTitle("Select Solvents")
+
         self.design = design_model
         self.selected = []
         self.setTitle("Solvent Picker")

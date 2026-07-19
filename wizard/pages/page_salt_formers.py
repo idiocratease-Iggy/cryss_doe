@@ -12,6 +12,8 @@ from PyQt6.QtCore import Qt
 class PageSaltFormers(QWizardPage):
     def __init__(self, design_model):
         super().__init__()
+        self.setTitle("Select Salt Formers")
+
         self.design = design_model
         self.setTitle("Salt Formers (Optional)")
 

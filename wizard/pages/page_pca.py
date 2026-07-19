@@ -142,6 +142,7 @@ class PCAPlotWidget(pg.PlotWidget):
 class PagePCA(QWizardPage):
     def __init__(self, design_model, parent=None):
         super().__init__(parent)
+        self.setTitle("PCA Solvent Selection")
 
         self.design_model = design_model
         self.selected = set()
