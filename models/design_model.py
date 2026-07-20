@@ -1,29 +1,54 @@
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Dict, Optional
 import pandas as pd
 
 @dataclass
 class DesignModel:
     """
-    This class acts as the central 'State Container' for the entire application.
-    It stores all the data, user selections, and loaded datasets that are 
-    shared across different pages of the wizard.
+    Central state container for the entire DoE wizard.
+    All pages write their values into this model.
     """
-    # File paths for the source Excel data
+
+    # -----------------------------
+    # File paths
+    # -----------------------------
     solvent_list_filename: str = "SolventList.xlsx"
     descriptor_filename: str = "Descriptors.xlsx"
     salt_former_filename: str = "SaltFormerList.xlsx"
 
-    # User selections from the Solvent Picker and PCA pages
+    # -----------------------------
+    # Loaded data
+    # -----------------------------
+    descriptor_df: pd.DataFrame = field(default_factory=pd.DataFrame)
+    salt_former_data: Dict = field(default_factory=dict)
+
+    # -----------------------------
+    # User selections
+    # -----------------------------
     selected_solvents: List[str] = field(default_factory=list)
     selected_solvents_pca: List[str] = field(default_factory=list)
+    selected_salt_formers: List[str] = field(default_factory=list)
 
-    # The main chemical descriptor data (loaded from Descriptors.xlsx)
-    descriptor_df: pd.DataFrame = field(default_factory=pd.DataFrame)
+    volume_levels: List[float] = field(default_factory=list)
+    number_of_starting_mixtures: int = 0
 
-    # Data regarding salt formers (categorized into acids, bases, etc.)
-    salt_former_data: dict = field(default_factory=dict)
-    selected_salt_formers: dict = field(default_factory=dict)
-    
-    # Flag to indicate if a salt-free control set should be included in the design
     include_salt_free_set: bool = False
+
+    # -----------------------------
+    # Plate design
+    # -----------------------------
+    plate_rows: int = 0
+    plate_cols: int = 0
+    fill_to_full_plates: bool = False
+    free_format: bool = False
+
+    # -----------------------------
+    # Replicates & randomization
+    # -----------------------------
+    replicate_percentage: float = 0.0
+    randomize_design: bool = False
+
+    # -----------------------------
+    # Output
+    # -----------------------------
+    output_filename: str = "experiment_output.xlsx"
