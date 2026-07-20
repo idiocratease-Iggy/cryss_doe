@@ -226,11 +226,15 @@ class PagePCA(QWizardPage):
     def on_point_clicked(self, solvent):
         if solvent in self.preselected:
             return
-
+ 
         if solvent in self.selected:
             self.selected.remove(solvent)
         else:
             self.selected.add(solvent)
+ 
+        # Calculate and print count for debugging
+        unique_solvents = list(self.selected | self.preselected)
+        print(f"DEBUG: Number of unique solvents selected in PCA: {len(unique_solvents)}")
 
         # Determine selected axis
         y_pc = next((i+2 for i, rb in enumerate(self.y_buttons) if rb.isChecked()), 2)
@@ -301,7 +305,10 @@ class PagePCA(QWizardPage):
     # Final selection
     # ---------------------------------------------------------
     def get_selected_solvents(self):
-        return list(self.selected | self.preselected)
+        unique_solvents = list(self.selected | self.preselected)
+        no_of_solvents = len(unique_solvents)
+        print(f"DEBUG: Number of unique solvents selected in PCA: {no_of_solvents}")
+        return unique_solvents
 
     def showEvent(self, event):
         super().showEvent(event)

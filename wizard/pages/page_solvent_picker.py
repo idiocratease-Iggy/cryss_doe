@@ -176,6 +176,9 @@ class PageSolventPicker(QWizardPage):
                         self.selected.append(normalize(name_item.text()))
     
         # Update the model with a unique list of selected solvents
-        self.design.selected_solvents_pca = list(set(self.selected))
+        unique_solvents = list(set(self.selected))
+        self.design.selected_solvents_pca = unique_solvents
+        no_of_solvents: int = len(unique_solvents)
+        print(f"DEBUG: Number of unique solvents selected: {no_of_solvents}")
     
         return True

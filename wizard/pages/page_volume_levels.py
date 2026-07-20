@@ -150,7 +150,7 @@ class PageVolumeLevels(QWizardPage):
 
         # Also expose heuristic as a method for checkbox toggling
         self.apply_replicate_heuristic = update_replicate_default
-
+    
         # ------------------------------
         # Final layout
         # ------------------------------
@@ -169,9 +169,7 @@ class PageVolumeLevels(QWizardPage):
         # Window sizing and centering
         # ------------------------------
 
-    def showEvent(self, event):
-            super().showEvent(event)
-            window = self.window()
-            if window is not None:
-                window.setMinimumSize(600, 600)
-                window.resize(600, 600)
+    def validatePage(self):
+        self.model.replicate_percentage = self.spin_replicate_pct.value() / 100.0
+        print(f"DEBUG: Replicate percentage set to: {self.model.replicate_percentage}")
+        return True
