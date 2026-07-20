@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QWizardPage,
     QRadioButton,
-    QHBoxLayout,
+    QGridLayout,   # ← ADD THIS
 )
 
 
@@ -18,10 +18,17 @@ class PageComponents(QWizardPage):
     def __init__(self, design_model):
         super().__init__()
         self.design = design_model
-        self.setTitle("Number of Components in Mixture System")
+        self.setTitle("Define Components in Mixture, and No. Mixture Systems")
     
         layout = QVBoxLayout()
     
+        label_title = QLabel("Number of components:")
+        font = label_title.font()
+        font.setPointSize(font.pointSize() + 2)
+        font.setBold(True)
+        label_title.setFont(font)
+        layout.addWidget(label_title)
+
         label = QLabel(
             "Specify the number of chemical components in the mixture system.\n"
             "This will define how many Component columns appear in the template."
@@ -39,43 +46,48 @@ class PageComponents(QWizardPage):
         layout.addWidget(label)
         layout.addWidget(self.spin)
         self.setMinimumWidth(600)
-        self.setLayout(layout)
-        wizard = self.wizard()
-
-                # --- Starting mixture options ---
+        
+        # --- Starting mixture options ---
         self.radio_single = QRadioButton(
             "All experiments use the same starting mixture composition"
         )
         self.radio_multiple = QRadioButton(
             "Experimental plan has several starting mixture compositions"
         )
-
-        # Default: single mixture
+        
         self.radio_single.setChecked(True)
-
-        # Spin box for number of starting mixtures
+        
         self.spin_starting = QSpinBox()
         self.spin_starting.setMinimum(2)
         self.spin_starting.setMaximum(20)
         self.spin_starting.setValue(2)
         self.spin_starting.setFixedWidth(60)
-        self.spin_starting.hide()  # hidden unless multiple mixtures selected
-
-        # Connect radio buttons
+        self.spin_starting.hide()
+        
         self.radio_single.toggled.connect(self._update_starting_mix_visibility)
         self.radio_multiple.toggled.connect(self._update_starting_mix_visibility)
-
-        # Add to layout
+        
         layout.addSpacing(20)
-        layout.addWidget(QLabel("Starting mixture options:"))
+        layout.addSpacing(40)
+        layout.addSpacing(20)
+        label_options = QLabel("Starting mixture options:")
+        font = label_options.font()
+        font.setPointSize(font.pointSize() + 2)
+        font.setBold(True)
+        label_options.setFont(font)
+        layout.addWidget(label_options)
         layout.addWidget(self.radio_single)
         layout.addWidget(self.radio_multiple)
+        self.label_starting_mixtures = QLabel("Number of starting mixtures:")
+        self.label_starting_mixtures.hide()
+        layout.addWidget(self.label_starting_mixtures)
+        layout.addWidget(self.spin_starting)
 
-        # Horizontal layout for spin box
-        hbox = QHBoxLayout()
-        hbox.addWidget(QLabel("Number of starting mixtures:"))
-        hbox.addWidget(self.spin_starting)
-        layout.addLayout(hbox)
+        self.setLayout(layout)
+        wizard = self.wizard()
+
+
+       
 
     
     def showEvent(self, event):
@@ -112,11 +124,13 @@ class PageComponents(QWizardPage):
         self.design.number_of_components = value
     
     def _update_starting_mix_visibility(self):
-        """Show spin box only when multiple starting mixtures are selected."""
         if self.radio_multiple.isChecked():
             self.spin_starting.show()
+            self.label_starting_mixtures.show()
         else:
             self.spin_starting.hide()
+            self.label_starting_mixtures.hide()
+
 
 
 
@@ -133,5 +147,6 @@ class PageComponents(QWizardPage):
             self.design.number_of_starting_mixtures = 1
         else:
             self.design.number_of_starting_mixtures = self.spin_starting.value()
+
 
         return True

@@ -178,6 +178,11 @@ class PagePlatePicker(QWizardPage):
         guidance.setStyleSheet("color: #CCCCCC;")
         left_layout.addWidget(guidance)
 
+        # Fill-to-full-plates option
+        self.checkbox_fill_full = QCheckBox("Fill up to full plates")
+        left_layout.addWidget(self.checkbox_fill_full)
+
+
         # Stretch LAST
         left_layout.addStretch()
 
@@ -205,6 +210,8 @@ class PagePlatePicker(QWizardPage):
         # Default selection
         self.rb_6x4.setChecked(True)
         self.update_preview(4, 6)
+
+        
 
 
 
@@ -275,5 +282,6 @@ class PagePlatePicker(QWizardPage):
         self.model.plate_cols = cols
         self.model.free_format = free
         self.model.randomize_design = self.chk_randomize.isChecked()
+        self.model.fill_to_full_plates = self.checkbox_fill_full.isChecked()
 
         return True
