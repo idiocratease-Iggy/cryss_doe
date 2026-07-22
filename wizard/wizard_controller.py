@@ -18,6 +18,7 @@ from experiment_generator import generate_experiments
 
 
 
+
 class DesignWizard(QWizard):
     def __init__(self, parent=None):
         super().__init__(parent)

@@ -24,11 +24,14 @@ class PageSolventPicker(QWizardPage):
         super().__init__()
         self.setTitle("Select Solvents")
 
+        # ⭐ FIXED: store the model correctly
+        self.model = design_model
         self.design = design_model
+
         self.selected = []
         self.setTitle("Solvent Picker")
         self.setMinimumSize(700, 760)
-    
+
         # Load solvent list from the file path provided in the DesignModel
         self.manager = SolventManager(self.design.solvent_list_filename)
         self.manager.load()
@@ -175,10 +178,11 @@ class PageSolventPicker(QWizardPage):
                     if name_item:
                         self.selected.append(normalize(name_item.text()))
     
-        # Update the model with a unique list of selected solvents
+
+            # Update the model with a unique list of selected solvents
         unique_solvents = list(set(self.selected))
-        self.design.selected_solvents_pca = unique_solvents
         no_of_solvents: int = len(unique_solvents)
+        self.model.selected_solvents = unique_solvents
+        self.design.selected_solvents_pca = unique_solvents
         print(f"DEBUG: Number of unique solvents selected: {no_of_solvents}")
-    
         return True

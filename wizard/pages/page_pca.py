@@ -142,6 +142,13 @@ class PCAPlotWidget(pg.PlotWidget):
 class PagePCA(QWizardPage):
     def __init__(self, design_model, parent=None):
         super().__init__(parent)
+
+        # ⭐ Correct: store the model properly
+        self.model = design_model
+        self.design_model = design_model
+        self.selected = set()
+        self.preselected = set(self.model.selected_solvents or [])
+
         self.setTitle("PCA Solvent Selection")
 
         self.design_model = design_model
@@ -192,6 +199,10 @@ class PagePCA(QWizardPage):
             rb.toggled.connect(self.update_axes)
 
 
+        self.preselected = set(self.model.selected_solvents) # PCA page must read picker solvents from the model
+
+
+
     # ---------------------------------------------------------
     # Page initialization
     # ---------------------------------------------------------
@@ -234,6 +245,7 @@ class PagePCA(QWizardPage):
  
         # Calculate and print count for debugging
         unique_solvents = list(self.selected | self.preselected)
+        self.model.selected_solvents_pca = unique_solvents
         print(f"DEBUG: Number of unique solvents selected in PCA: {len(unique_solvents)}")
 
         # Determine selected axis
@@ -308,6 +320,7 @@ class PagePCA(QWizardPage):
         unique_solvents = list(self.selected | self.preselected)
         no_of_solvents = len(unique_solvents)
         print(f"DEBUG: Number of unique solvents selected in PCA: {no_of_solvents}")
+        self.model.selected_solvents_pca = unique_solvents
         return unique_solvents
 
     def showEvent(self, event):

@@ -90,6 +90,7 @@ class PageVolumeLevels(QWizardPage):
             )
         )
 
+
         # ------------------------------
         # Replicates section
         # ------------------------------
@@ -170,6 +171,22 @@ class PageVolumeLevels(QWizardPage):
         # ------------------------------
 
     def validatePage(self):
+        # Replicate percentage (already correct)
         self.model.replicate_percentage = self.spin_replicate_pct.value() / 100.0
+
+        # Volume level COUNT
+        self.model.number_of_volume_levels = self.spin_volumes.value()
+
+        # Mode
+        if self.radio_relative.isChecked():
+            self.model.volume_mode = "relative"
+            self.model.volume_unit = None
+        else:
+            self.model.volume_mode = "absolute"
+            self.model.volume_unit = self.combo_units.currentText()
+
+        print(f"DEBUG: Volume level count: {self.model.number_of_volume_levels}")
+        print(f"DEBUG: Volume mode: {self.model.volume_mode}")
+        print(f"DEBUG: Volume unit: {self.model.volume_unit}")
         print(f"DEBUG: Replicate percentage set to: {self.model.replicate_percentage}")
         return True

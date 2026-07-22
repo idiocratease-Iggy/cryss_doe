@@ -33,7 +33,7 @@ def generate_experiments(design) -> list[Experiment]:
     # -----------------------------
     starting_mixtures = range(1, design.number_of_starting_mixtures + 1)
     solvents = design.selected_solvents              # list of names
-    volumes = design.volume_levels                   # e.g. [0.5, 1.0, 2.0]
+    volumes = range(design.number_of_volume_levels) # e.g. [1,2,3..]]
     salt_formers = design.selected_salt_formers      # list of names (may be empty)
 
     include_salt_free = design.include_salt_free_set
@@ -191,5 +191,38 @@ def generate_experiments(design) -> list[Experiment]:
                 exp.origin_plate_ref = f"{plate_name}.{well}"
 
             exp_index += 1
+
+    # -----------------------------
+    # DEBUG BLOCK — ALWAYS RUNS
+    # -----------------------------
+    plates = {}
+    for exp in experiments:
+        plates.setdefault(exp.plate, []).append(exp.well)
+
+    print("\n=== PLATE ASSIGNMENT ===")
+    for plate, wells in plates.items():
+        print(plate, len(wells), "wells")
+
+    print("\n=== REPLICATE ORIGINS ===")
+    for exp in experiments:
+        if exp.replicate_status != "Base":
+            print(exp.id, "→ origin:", exp.origin_id, exp.origin_plate_ref)
+
+    salt_free = [e for e in experiments if e.salt_former is None]
+    salted = [e for e in experiments if e.salt_former is not None]
+
+    print("\n=== SALT-FREE VS SALTED ===")
+    print("Salt-free:", len(salt_free))
+    print("Salted:", len(salted))
+
+    print("\n=== PCA & VOLUME DEBUG ===")
+    print("PCA solvents:", design.selected_solvents_pca) # self.model.selected_solvents_pca = unique_solvents
+    print("Picker solvents:", design.selected_solvents)
+    print("Volume levels:", design.volume_levels)
+
+    # -----------------------------
+    # STEP 5: RETURN
+    # -----------------------------
+        
 
     return experiments
