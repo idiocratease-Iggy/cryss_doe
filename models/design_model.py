@@ -29,7 +29,10 @@ class DesignModel:
     selected_solvents_pca: List[str] = field(default_factory=list)
     selected_salt_formers: List[str] = field(default_factory=list)
 
-    volume_levels: List[float] = field(default_factory=list)
+    number_of_volume_levels: int = 2
+    volume_mode: str = "relative"
+    volume_unit: Optional[str] = None
+
     number_of_starting_mixtures: int = 0
 
     include_salt_free_set: bool = False

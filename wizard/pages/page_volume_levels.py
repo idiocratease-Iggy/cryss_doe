@@ -176,6 +176,10 @@ class PageVolumeLevels(QWizardPage):
 
         # Volume level COUNT
         self.model.number_of_volume_levels = self.spin_volumes.value()
+        
+        # Populate volume levels based on count (using mnemonics)
+        count = self.model.number_of_volume_levels
+        self.model.volume_levels = [f"Volume_{i:02d}" for i in range(1, count + 1)]
 
         # Mode
         if self.radio_relative.isChecked():
@@ -185,8 +189,10 @@ class PageVolumeLevels(QWizardPage):
             self.model.volume_mode = "absolute"
             self.model.volume_unit = self.combo_units.currentText()
 
+        print(f"DEBUG: Volume levels list: {self.model.volume_levels}")
         print(f"DEBUG: Volume level count: {self.model.number_of_volume_levels}")
         print(f"DEBUG: Volume mode: {self.model.volume_mode}")
         print(f"DEBUG: Volume unit: {self.model.volume_unit}")
         print(f"DEBUG: Replicate percentage set to: {self.model.replicate_percentage}")
         return True
+

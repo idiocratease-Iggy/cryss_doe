@@ -32,9 +32,21 @@ def generate_experiments(design) -> list[Experiment]:
     # STEP 1: BASE COMBINATIONS (X)
     # -----------------------------
     starting_mixtures = range(1, design.number_of_starting_mixtures + 1)
+    print(f"DEBUG: Starting mixtures count: {len(starting_mixtures)}")
     solvents = design.selected_solvents              # list of names
-    volumes = range(design.number_of_volume_levels) # e.g. [1,2,3..]]
+    volumes = design.volume_levels                        # list of floats, e.g. [0.1, 0.2, 0.3]
+    print(f"DEBUG: Solvents count: {len(solvents)}, content: {solvents}")
+    print(f"DEBUG: Volumes count: {len(volumes)}, content: {volumes}")
+    print("Volume levels:", design.number_of_volume_levels)  # e.g. [1,2,3..]]
     salt_formers = design.selected_salt_formers      # list of names (may be empty)
+    # Flatten all lists inside the dictionary into one single list of names
+    salt_formers = []
+    for category in design.selected_salt_formers.values():
+        if isinstance(category, list):
+            salt_formers.extend(category)
+
+    print(f"DEBUG: salt_formers content: {salt_formers}")
+
 
     include_salt_free = design.include_salt_free_set
 
@@ -195,6 +207,7 @@ def generate_experiments(design) -> list[Experiment]:
     # -----------------------------
     # DEBUG BLOCK — ALWAYS RUNS
     # -----------------------------
+    
     plates = {}
     for exp in experiments:
         plates.setdefault(exp.plate, []).append(exp.well)
@@ -203,13 +216,20 @@ def generate_experiments(design) -> list[Experiment]:
     for plate, wells in plates.items():
         print(plate, len(wells), "wells")
 
-    print("\n=== REPLICATE ORIGINS ===")
+    print("\n=== ALL WELL REFERENCES ===")
     for exp in experiments:
         if exp.replicate_status != "Base":
-            print(exp.id, "→ origin:", exp.origin_id, exp.origin_plate_ref)
+            print(f"{exp.id} → origin: {exp.origin_id} ({exp.origin_plate_ref})")
+        else:
+            # For base experiments, the well itself is the reference point
+            print(f"{exp.id} (Base) at {exp.plate}.{exp.well}")
 
-    salt_free = [e for e in experiments if e.salt_former is None]
-    salted = [e for e in experiments if e.salt_former is not None]
+
+    #salt_free = [e for e in experiments if e.salt_former is None and e.replicate_status == "Base"]
+    #salted = [e for e in experiments if e.salt_former is not None and e.replicate_status == "Base"]
+    salt_free = [e for e in experiments if e.salt_former is None and e.replicate_status == "Base"]
+    salted = [e for e in experiments if e.salt_former is not None and e.replicate_status == "Base"]
+
 
     print("\n=== SALT-FREE VS SALTED ===")
     print("Salt-free:", len(salt_free))
