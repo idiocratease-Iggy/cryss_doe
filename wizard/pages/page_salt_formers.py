@@ -73,7 +73,7 @@ class PageSaltFormers(QWizardPage):
         main_layout.addLayout(columns_layout)
 
         # 5. Salt-free checkbox (hidden until needed)
-        self.salt_free_checkbox = QCheckBox("Include a salt-free control set")
+        self.salt_free_checkbox = QCheckBox("Include a salt-free set")
         self.salt_free_checkbox.setVisible(False)
         main_layout.addWidget(self.salt_free_checkbox)
 

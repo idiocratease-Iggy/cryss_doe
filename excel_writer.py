@@ -23,7 +23,7 @@ def save_experiments_to_excel(parent, experiments, num_components=0, volume_mode
     )
 
     if not filename:
-        return  # user cancelled
+        return False  # user cancelled
 
     # -----------------------------
     # 2. Create workbook + sheet
@@ -111,6 +111,11 @@ def save_experiments_to_excel(parent, experiments, num_components=0, volume_mode
         header_cell.alignment = Alignment(horizontal="center", vertical="center")
 
     # Save the workbook
-    wb.save(filename)
+    try:
+        wb.save(filename)
+        return True
+    except Exception as e:
+        print(f"Error saving excel file: {e}")
+        return False
 
 
