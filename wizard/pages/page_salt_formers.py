@@ -117,7 +117,7 @@ class PageSaltFormers(QWizardPage):
         # Calculate total number of salt formers selected
         unique_salt_formers = list(set(acids + chiral_acids + bases + chiral_bases))
         self.design.no_of_salt_formers = len(unique_salt_formers)
-        print(f"DEBUG: Number of unique salt formers selected: {self.design.no_of_salt_formers}")
+        #     print(f"DEBUG: Number of unique salt formers selected: {self.design.no_of_salt_formers}")
  
         self.design.include_salt_free_set = bool(self.salt_free_checkbox.isVisible()
                                                      and self.salt_free_checkbox.isChecked())

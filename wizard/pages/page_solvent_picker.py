@@ -184,5 +184,5 @@ class PageSolventPicker(QWizardPage):
         no_of_solvents: int = len(unique_solvents)
         self.model.selected_solvents = unique_solvents
         self.design.selected_solvents_pca = unique_solvents
-        print(f"DEBUG: Number of unique solvents selected: {no_of_solvents}")
+        #     print(f"DEBUG: Number of unique solvents selected: {no_of_solvents}")
         return True

@@ -189,10 +189,10 @@ class PageVolumeLevels(QWizardPage):
             self.model.volume_mode = "absolute"
             self.model.volume_unit = self.combo_units.currentText()
 
-        print(f"DEBUG: Volume levels list: {self.model.volume_levels}")
-        print(f"DEBUG: Volume level count: {self.model.number_of_volume_levels}")
-        print(f"DEBUG: Volume mode: {self.model.volume_mode}")
-        print(f"DEBUG: Volume unit: {self.model.volume_unit}")
-        print(f"DEBUG: Replicate percentage set to: {self.model.replicate_percentage}")
+        #     print(f"DEBUG: Volume levels list: {self.model.volume_levels}")
+        #     print(f"DEBUG: Volume level count: {self.model.number_of_volume_levels}")
+        #     print(f"DEBUG: Volume mode: {self.model.volume_mode}")
+        #     print(f"DEBUG: Volume unit: {self.model.volume_unit}")
+        #     print(f"DEBUG: Replicate percentage set to: {self.model.replicate_percentage}")
         return True
 

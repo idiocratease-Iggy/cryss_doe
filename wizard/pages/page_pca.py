@@ -246,7 +246,7 @@ class PagePCA(QWizardPage):
         # Calculate and print count for debugging
         unique_solvents = list(self.selected | self.preselected)
         self.model.selected_solvents_pca = unique_solvents
-        print(f"DEBUG: Number of unique solvents selected in PCA: {len(unique_solvents)}")
+        #     print(f"DEBUG: Number of unique solvents selected in PCA: {len(unique_solvents)}")
 
         # Determine selected axis
         y_pc = next((i+2 for i, rb in enumerate(self.y_buttons) if rb.isChecked()), 2)
@@ -319,7 +319,7 @@ class PagePCA(QWizardPage):
     def get_selected_solvents(self):
         unique_solvents = list(self.selected | self.preselected)
         no_of_solvents = len(unique_solvents)
-        print(f"DEBUG: Number of unique solvents selected in PCA: {no_of_solvents}")
+        #     print(f"DEBUG: Number of unique solvents selected in PCA: {no_of_solvents}")
         self.model.selected_solvents_pca = unique_solvents
         return unique_solvents
 
