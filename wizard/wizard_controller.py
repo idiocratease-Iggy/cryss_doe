@@ -8,11 +8,9 @@ from wizard.pages.page_pca import PagePCA
 from wizard.pages.page_salt_formers import PageSaltFormers
 from wizard.pages.page_volume_levels import PageVolumeLevels
 from wizard.pages.page_plate_picker import PagePlatePicker
-from wizard.pages.page_experiment_generator import PageExperimentGenerator
-
 from models.descriptor_manager import DescriptorManager
 from models.design_model import DesignModel
-from excel_writer import write_experiment_excel
+from excel_writer import save_experiments_to_excel
 from experiment_generator import generate_experiments
 
 
@@ -54,7 +52,6 @@ class DesignWizard(QWizard):
         self.page_salt_formers = PageSaltFormers(self.model)
         self.page_volume_levels = PageVolumeLevels(self.model)
         self.page_plate_picker = PagePlatePicker(self.model)
-        self.page_experiment_generator = PageExperimentGenerator(self.model)
 
         # Add pages in order
         self.addPage(self.page_components)
@@ -63,15 +60,7 @@ class DesignWizard(QWizard):
         self.addPage(self.page_salt_formers)
         self.addPage(self.page_volume_levels)
         self.addPage(self.page_plate_picker)
-        self.addPage(self.page_experiment_generator)
 
     def accept(self):
-        # 1. Build experiment list
-        experiments = generate_experiments(self.model)
-
-        # 2. Write Excel file
-        write_experiment_excel(experiments, self.model.output_filename)
-
-        # 3. Close wizard
         super().accept()
 

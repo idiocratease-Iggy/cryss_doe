@@ -8,14 +8,17 @@ from PyQt6.QtWidgets import (
     QSpinBox,
     QCheckBox,
     QWidget,
+    QPushButton,
+    QMessageBox
 )
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QPainter, QPen, QFont
 from PyQt6.QtWidgets import QSizePolicy
 
-
 import string
 
+from excel_writer import save_experiments_to_excel
+from experiment_generator import generate_experiments
 
 # ---------------------------------------------------------
 # Plate Preview Widget
@@ -68,7 +71,6 @@ class PlatePreview(QWidget):
         #plate_y = (self.height() - plate_h) / 2
         plate_x = 40   # left margin
         plate_y = 40   # top margin
-
 
         # --- Draw plate outline ---
         painter.drawRect(int(plate_x), int(plate_y), int(plate_w), int(plate_h))
@@ -139,7 +141,6 @@ class PagePlatePicker(QWizardPage):
         self.rb_8x6 = QRadioButton("8 × 6 (48 wells)")
         self.rb_12x8 = QRadioButton("12 × 8 (96 wells)")
 
-
         self.rb_free = QRadioButton("Free format:")
         self.spin_rows = QSpinBox()
         self.spin_cols = QSpinBox()
@@ -182,8 +183,34 @@ class PagePlatePicker(QWizardPage):
         self.checkbox_fill_full = QCheckBox("Fill up to full plates")
         left_layout.addWidget(self.checkbox_fill_full)
 
+        # Write Excel Button (Moved up for visibility)
+        self.btn_write = QPushButton("Write Excel File")
+        self.btn_write.clicked.connect(self.write_excel)
+        # Apply a "glassy" blue style that mimics translucency
+        self.btn_write.setStyleSheet("""
+            QPushButton {
+                background-color: qlineargradient(x1:0, y1:0, x2:1, y2:1, 
+                                    stop:0 #3a86ff, stop:1 #2563eb);
+                color: white;
+                border: 1px solid rgba(255, 255, 255, 70);
+                border-radius: 6px;
+                padding: 12px;
+                font-weight: bold;
+                font-size: 14px;
+            }
+            QPushButton:hover {
+                background-color: qlineargradient(x1:0, y1:0, x2:1, y2:1, 
+                                    stop:0 #5c9aff, stop:1 #3b82f6);
+                border: 1px solid rgba(255, 255, 255, 100);
+            }
+            QPushButton:pressed {
+                background-color: #1d4ed8;
+                padding-top: 13px;
+                padding-bottom: 11px;
+            }
+        """)
+        left_layout.addWidget(self.btn_write)
 
-        # Stretch LAST
         left_layout.addStretch()
 
         # -----------------------------------------------------
@@ -210,9 +237,6 @@ class PagePlatePicker(QWizardPage):
         # Default selection
         self.rb_6x4.setChecked(True)
         self.update_preview(4, 6)
-
-        
-
 
 
     # ---------------------------------------------------------
@@ -253,6 +277,32 @@ class PagePlatePicker(QWizardPage):
         elif self.rb_12x8.isChecked():
             self.update_preview(8, 12)
 
+
+    # ---------------------------------------------------------
+    # Save results into DesignModel
+    # ---------------------------------------------------------
+    def write_excel(self):
+        # 1. Update model with current UI selections
+        self.validatePage()
+        
+        # 2. Generate experiments
+        experiments = generate_experiments(self.model)
+        
+        # 3. Write Excel file
+        save_experiments_to_excel(
+            parent=self,
+            experiments=experiments,
+            num_components=self.model.number_of_components,
+            volume_mode=self.model.volume_mode,
+            volume_unit=self.model.volume_unit
+        )
+        
+        # 4. Notify user
+        QMessageBox.information(
+            self,
+            "Excel Written",
+            "The CRYSS experiment template has been written successfully."
+        )
 
     # ---------------------------------------------------------
     # Save results into DesignModel

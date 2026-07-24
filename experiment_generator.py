@@ -131,8 +131,12 @@ def generate_experiments(design) -> list[Experiment]:
 
     no_react = plate_rows * plate_cols
     no_expts_base_case = len(experiments)
-
-    no_plates = math.ceil(no_expts_base_case / no_react)
+    
+    if no_react == 0:
+        # Fallback if plate dimensions are somehow zero to avoid division by zero
+        no_plates = 1
+    else:
+        no_plates = math.ceil(no_expts_base_case / no_react)
     total_wells = no_plates * no_react
     no_uur = total_wells - no_expts_base_case
 
@@ -224,6 +228,15 @@ def generate_experiments(design) -> list[Experiment]:
             # For base experiments, the well itself is the reference point
             print(f"{exp.id} (Base) at {exp.plate}.{exp.well}")
 
+    print("\n=== REPLICATE ORIGINS ===")
+    has_reps = any(exp.replicate_status != "Base" for exp in experiments)
+
+    if not has_reps:
+        print("No replicates generated.")
+    else:
+        for exp in experiments:
+            if exp.replicate_status != "Base":
+                print(exp.id, "→ origin:", exp.origin_id, exp.origin_plate_ref)
 
     #salt_free = [e for e in experiments if e.salt_former is None and e.replicate_status == "Base"]
     #salted = [e for e in experiments if e.salt_former is not None and e.replicate_status == "Base"]
