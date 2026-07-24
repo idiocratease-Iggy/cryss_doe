@@ -1,5 +1,6 @@
 import openpyxl
 from utils import normalize
+from utils.paths import resource_path
 
 class SolventManager:
     """
@@ -16,8 +17,10 @@ class SolventManager:
         Opens the Excel workbook and extracts solvent names into a list.
         Uses 'data_only=True' to ensure we get values instead of formulas.
         """
+        # Ensure we look inside the 'data' folder which is bundled by PyInstaller
+        file_path = resource_path(f"data/{self.filename}")
         # Load the workbook, ensuring we read the resulting values of any formulas
-        wb = openpyxl.load_workbook(self.filename, data_only=True)
+        wb = openpyxl.load_workbook(file_path, data_only=True)
         ws = wb.active
     
         self.solvents = []

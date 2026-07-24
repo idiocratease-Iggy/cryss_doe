@@ -1,5 +1,6 @@
 import pandas as pd
 from utils import normalize
+from utils.paths import resource_path
 
 class DescriptorManager:
     """
@@ -15,7 +16,9 @@ class DescriptorManager:
         Reads the Excel file, normalizes solvent names, and removes 
         any rows containing missing data.
         """
-        df = pd.read_excel(self.filename)
+        # Ensure we look inside the 'data' folder which is bundled by PyInstaller
+        file_path = resource_path(f"data/{self.filename}")
+        df = pd.read_excel(file_path)
     
         # Normalise solvent names to ensure consistency (e.g., "Ethanol" vs "ethanol")
         if "Solvent" in df.columns:

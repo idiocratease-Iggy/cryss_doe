@@ -30,7 +30,7 @@ class PageSolventPicker(QWizardPage):
 
         self.selected = []
         self.setTitle("Solvent Picker")
-        self.setMinimumSize(700, 760)
+        self.setMinimumSize(700, 700)
 
         # Load solvent list from the file path provided in the DesignModel
         self.manager = SolventManager(self.design.solvent_list_filename)
@@ -145,8 +145,8 @@ class PageSolventPicker(QWizardPage):
     
         window = self.window()
         if window is not None:
-            window.setMinimumSize(700, 760)
-            window.resize(700, 760)
+            window.setMinimumSize(700, 700)
+            window.resize(700, 700)
     
             frame = window.frameGeometry()
             center_point = window.screen().availableGeometry().center()

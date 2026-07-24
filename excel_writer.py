@@ -15,10 +15,17 @@ def save_experiments_to_excel(parent, experiments, num_components=0, volume_mode
     # -----------------------------
     # 1. Ask user where to save file
     # -----------------------------
+    import os
+    from PyQt6.QtCore import QStandardPaths
+
+    default_path = QStandardPaths.writableLocation(QStandardPaths.StandardLocation.DocumentsLocation)
+    if not default_path:
+        default_path = os.path.expanduser("~\\Documents")
+
     filename, _ = QFileDialog.getSaveFileName(
         parent,
         "Save CRYSS Experiment Template",
-        "",
+        default_path,
         "Excel Files (*.xlsx)"
     )
 

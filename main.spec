@@ -5,7 +5,7 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[('styles.qss', '.'), ('Descriptors.xlsx', '.'), ('SolventList.xlsx', '.'), ('SaltFormerList.xlsx', '.')],
+    datas=[('styles.qss', '.'), ('data/', 'data/')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
