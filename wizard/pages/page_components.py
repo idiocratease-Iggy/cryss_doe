@@ -55,6 +55,11 @@ class PageComponents(QWizardPage):
             "Experimental plan has several starting mixture compositions"
         )
         
+        font = self.radio_single.font()
+        font.setPointSize(9)
+        self.radio_single.setFont(font)
+        self.radio_multiple.setFont(font)
+
         self.radio_single.setChecked(True)
         
         self.spin_starting = QSpinBox()

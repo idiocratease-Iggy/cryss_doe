@@ -1,11 +1,16 @@
 from PyQt6.QtWidgets import (
     QWizardPage,
     QVBoxLayout,
+    QHBoxLayout,
     QLabel,
     QGroupBox,
     QRadioButton,
+    QScrollArea,
+    QWidget,
+    QFrame,
 )
-from PyQt6.QtCore import Qt, pyqtSignal
+
+from PyQt6.QtCore import Qt, pyqtSignal, QTimer
 
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
@@ -158,7 +163,8 @@ class PagePCA(QWizardPage):
 
         self.setTitle("Explore solvent space using PCA")
 
-        layout = QVBoxLayout(self)
+        layout = QHBoxLayout(self)
+        left_layout = QVBoxLayout()
 
         # Using HTML for multi-colored text
         # Orange: #FFA500, Red: #FF7878
@@ -173,11 +179,51 @@ class PagePCA(QWizardPage):
 
         self.label = QLabel(text)
         self.label.setWordWrap(True)
-        layout.addWidget(self.label)
+        self.label.setStyleSheet("font-size: 10px;")
+        left_layout.addWidget(self.label)
 
         # --- PCA plot ---
         self.plot_widget = PCAPlotWidget(self)
-        layout.addWidget(self.plot_widget)
+        
+        # Wrap the plot in a scroll area to handle small screens and prevent clipping
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setFrameShape(QFrame.Shape.NoFrame)
+        
+        container = QWidget()
+        container_layout = QVBoxLayout(container)
+        container_layout.setContentsMargins(10, 10, 10, 10)
+        container_layout.setSpacing(0)
+        container_layout.addWidget(self.plot_widget)
+        
+        scroll_area.setWidget(container)
+        scroll_area.setStyleSheet("""
+            QScrollArea {
+                border: none;
+                background-color: transparent;
+            }
+            QScrollBar:vertical {
+                border: none;
+                background: #3c3c3c;
+                width: 10px;
+                margin: 0px;
+            }
+            QScrollBar::handle:vertical {
+                background: #718096;
+                min-height: 20px;
+                border-radius: 5px;
+            }
+        """)
+        
+        container.setContentsMargins(0, 0, 0, 0)
+        left_layout.addWidget(scroll_area)
+
+
+        
+        layout.addLayout(left_layout)
+
+
+
 
         self.plot_widget.pointClicked.connect(self.on_point_clicked)
 
@@ -188,6 +234,9 @@ class PagePCA(QWizardPage):
         self.y_buttons = []
         for i in [2, 3, 4]:
             rb = QRadioButton(f"PC{i}")
+            font = rb.font()
+            font.setPointSize(9)
+            rb.setFont(font)
             axis_layout.addWidget(rb)
             self.y_buttons.append(rb)
 
@@ -232,7 +281,10 @@ class PagePCA(QWizardPage):
 
         self.preselected = {normalize(s) for s in self.design_model.selected_solvents_pca}
 
-        self.update_plot()
+        QTimer.singleShot(0, self.update_plot)
+
+
+
 
     def on_point_clicked(self, solvent):
         if solvent in self.preselected:
@@ -325,8 +377,6 @@ class PagePCA(QWizardPage):
 
     def showEvent(self, event):
         super().showEvent(event)
-        window = self.window()
-        if window is not None:
-            # Restore PCA page to its larger size
-            window.setMinimumSize(1200, 900)
-            window.resize(1200, 900)
+        # Removed hardcoded window resizing to allow other pages to control size.
+        # Note: The wizard's initial size is handled by the main window or previous pages.
+

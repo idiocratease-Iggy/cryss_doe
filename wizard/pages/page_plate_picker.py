@@ -119,7 +119,7 @@ class PagePlatePicker(QWizardPage):
         self.model = model
 
         self.setTitle("Select Plate Format")
-        self.setMinimumSize(1200, 1000)
+
 
         # ⭐ Create main layout FIRST
         main_layout = QHBoxLayout(self)
@@ -140,10 +140,17 @@ class PagePlatePicker(QWizardPage):
         self.rb_6x4 = QRadioButton("6 × 4 (24 wells)")
         self.rb_8x6 = QRadioButton("8 × 6 (48 wells)")
         self.rb_12x8 = QRadioButton("12 × 8 (96 wells)")
-
         self.rb_free = QRadioButton("Free format:")
-        self.spin_rows = QSpinBox()
+        
+        # Apply smaller font to radio buttons to prevent cropping
+        for rb in [self.rb_4x3, self.rb_3x5, self.rb_6x4, self.rb_8x6, self.rb_12x8, self.rb_free]:
+            font = rb.font()
+            font.setPointSize(9)
+            rb.setFont(font)
+            rb.setStyleSheet("font-size: 9pt;")
+            
         self.spin_cols = QSpinBox()
+        self.spin_rows = QSpinBox()
         self.spin_rows.setRange(1, 26)
         self.spin_cols.setRange(1, 50)
         self.spin_rows.setEnabled(False)
@@ -241,8 +248,12 @@ class PagePlatePicker(QWizardPage):
         super().showEvent(event)
         wizard = self.wizard()
         if wizard is not None:
-            wizard.setMinimumSize(950, 650)
-            wizard.resize(950, 650)
+            # Removed hardcoded resize to allow for dynamic scaling on different resolutions
+             # Set standard dimensions for the wizard window
+            wizard.setMinimumSize(600, 500)   # ⭐ critical
+            wizard.resize(750, 550)
+            
+           # pass
 
         # Force correct initial preview AFTER window is sized
         if self.rb_4x3.isChecked():

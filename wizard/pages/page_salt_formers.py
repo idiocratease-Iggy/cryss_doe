@@ -5,7 +5,11 @@ from PyQt6.QtWidgets import (
     QLabel,
     QGroupBox,
     QCheckBox,
+    QScrollArea,
+    QWidget,
+    QFrame,
 )
+
 from PyQt6.QtCore import Qt
 
 
@@ -57,10 +61,14 @@ class PageSaltFormers(QWizardPage):
             box = QGroupBox(title)
             v = QVBoxLayout()
             for item in items:
-                cb = QCheckBox(item)
-                cb.stateChanged.connect(self.update_salt_free_visibility)
-                store_list.append(cb)
-                v.addWidget(cb)
+                 cb = QCheckBox(item)
+                 font = cb.font()
+                 font.setPointSize(9)
+                 cb.setFont(font)
+                 cb.setStyleSheet("font-size: 9pt;")
+                 cb.stateChanged.connect(self.update_salt_free_visibility)
+                 store_list.append(cb)
+                 v.addWidget(cb)
             v.addStretch()
             box.setLayout(v)
             return box
@@ -70,7 +78,52 @@ class PageSaltFormers(QWizardPage):
         columns_layout.addWidget(build_group("Bases", bases, self.base_checkboxes))
         columns_layout.addWidget(build_group("Chiral Bases", chiral_bases, self.chiral_base_checkboxes))
 
-        main_layout.addLayout(columns_layout)
+        # Wrap columns in a scroll area to prevent clipping on small screens
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QScrollArea.Shape.NoFrame)
+        
+        container = QWidget()
+        container_layout = QVBoxLayout(container)
+        container_layout.setContentsMargins(10, 10, 10, 10)
+        container_layout.setSpacing(0)
+        container_layout.addLayout(columns_layout)
+        container_layout.addStretch()
+        
+        scroll.setWidget(container)
+        scroll.setStyleSheet("""
+            QScrollArea {
+                border: none;
+                background-color: transparent;
+            }
+            QScrollBar:vertical {
+                border: none;
+                background: #3c3c3c;
+                width: 10px;
+                margin: 0px;
+            }
+            QScrollBar::handle:vertical {
+                background: #718096;
+                min-height: 20px;
+                border-radius: 5px;
+            }
+            QScrollBar:horizontal {
+                border: none;
+                background: #3c3c3c;
+                height: 10px;
+                margin: 0px;
+            }
+            QScrollBar::handle:horizontal {
+                background: #718096;
+                min-width: 20px;
+                border-radius: 5px;
+            }
+        """)
+        main_layout.addWidget(scroll)
+
+
+
+
 
         # 5. Salt-free checkbox (hidden until needed)
         self.salt_free_checkbox = QCheckBox("Include a salt-free set")
@@ -78,6 +131,9 @@ class PageSaltFormers(QWizardPage):
         main_layout.addWidget(self.salt_free_checkbox)
 
         self.setLayout(main_layout)
+
+
+
 
     def update_salt_free_visibility(self):
         """Show the salt-free checkbox if any salt former is selected."""
@@ -92,13 +148,28 @@ class PageSaltFormers(QWizardPage):
 
     def showEvent(self, event):
         super().showEvent(event)
-        wizard = self.wizard()
-        if wizard is not None:
-            wizard.setMinimumSize(900, 850)
-            wizard.resize(900, 850)
-
         # Call the helper method you already wrote!
         self.update_salt_free_visibility()
+        wizard = self.wizard()
+        if wizard is not None:
+            # Set standard dimensions for the wizard window
+            wizard.setMinimumSize(600, 500)   # ⭐ critical
+            wizard.resize(600, 500)
+    
+            # Center the window on the user's screen
+            frame = wizard.frameGeometry()
+            center_point = wizard.screen().availableGeometry().center()
+            frame.moveCenter(center_point)
+            wizard.move(frame.topLeft())
+    
+    
+        if wizard is not None:
+        #    wizard.resize(600, 500)   # or your prefer`red size
+    
+            frame = wizard.frameGeometry()
+            center_point = wizard.screen().availableGeometry().center()
+            frame.moveCenter(center_point)
+            wizard.move(frame.topLeft())
 
 
     def validatePage(self) -> bool:

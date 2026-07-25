@@ -29,8 +29,8 @@ class PageStartingMixtures(QWizardPage):
 
         layout.addWidget(label)
         layout.addWidget(self.spin)
-        self.setMinimumWidth(600)
         self.setLayout(layout)
+
 
     def _on_value_changed(self, value: int):
         self.design.number_of_starting_mixtures = value

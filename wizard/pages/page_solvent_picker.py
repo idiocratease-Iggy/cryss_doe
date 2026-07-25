@@ -8,9 +8,10 @@ from PyQt6.QtWidgets import (
     QWidget,
     QHBoxLayout,
     QHeaderView,
+    QScrollArea,
+    QFrame,
 )
 from PyQt6.QtCore import Qt
-
 from models.solvent_manager import SolventManager
 from utils import normalize
 
@@ -30,7 +31,6 @@ class PageSolventPicker(QWizardPage):
 
         self.selected = []
         self.setTitle("Solvent Picker")
-        self.setMinimumSize(700, 700)
 
         # Load solvent list from the file path provided in the DesignModel
         self.manager = SolventManager(self.design.solvent_list_filename)
@@ -51,11 +51,14 @@ class PageSolventPicker(QWizardPage):
     
         rows = max(len(left), len(right))
         self.table.setRowCount(rows)
-    
         for row in range(rows):
             # Populate Left Column
             if row < len(left):
                 checkbox_left = QCheckBox()
+                font = checkbox_left.font()
+                font.setPointSize(9)
+                checkbox_left.setFont(font)
+                checkbox_left.setStyleSheet("font-size: 9pt;")
                 widget_left = QWidget()
                 hbox_left = QHBoxLayout()
                 hbox_left.addWidget(checkbox_left)
@@ -63,15 +66,16 @@ class PageSolventPicker(QWizardPage):
                 hbox_left.setContentsMargins(0, 0, 0, 0)
                 widget_left.setLayout(hbox_left)
                 self.table.setCellWidget(row, 0, widget_left)
-    
+
                 item_left = QTableWidgetItem(left[row]["Name"])
                 # Prevent users from editing the solvent names directly in the table
                 item_left.setFlags(item_left.flags() ^ Qt.ItemFlag.ItemIsEditable)
                 self.table.setItem(row, 1, item_left)
-    
+
             # Populate Right Column
             if row < len(right):
                 checkbox_right = QCheckBox()
+                checkbox_right.setStyleSheet("font-size: 9pt;")
                 widget_right = QWidget()
                 hbox_right = QHBoxLayout()
                 hbox_right.addWidget(checkbox_right)
@@ -79,12 +83,11 @@ class PageSolventPicker(QWizardPage):
                 hbox_right.setContentsMargins(0, 0, 0, 0)
                 widget_right.setLayout(hbox_right)
                 self.table.setCellWidget(row, 2, widget_right)
-    
+
                 item_right = QTableWidgetItem(right[row]["Name"])
                 # Prevent users from editing the solvent names directly in the table
                 item_right.setFlags(item_right.flags() ^ Qt.ItemFlag.ItemIsEditable)
                 self.table.setItem(row, 3, item_right)
-    
         self.table.verticalHeader().setVisible(False)
         self.table.setShowGrid(False)
         header = self.table.horizontalHeader()
@@ -126,32 +129,62 @@ class PageSolventPicker(QWizardPage):
         # Removed setFixedWidth so it can adapt to the window size
         container_layout = QVBoxLayout(container_widget)
         # Added generous margins here to create the "framed" look within the window
-        container_layout.setContentsMargins(20, 10, 20, 10)
+        container_layout.setContentsMargins(10, 10, 10, 10)
         container_layout.setSpacing(0)
         container_layout.addWidget(self.table)
-    
+
+
+
+        # Wrap the container in a scroll area to handle small screens/large lists
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setFrameShape(QFrame.Shape.NoFrame)
+        scroll_area.setWidget(container_widget)
+        scroll_area.setStyleSheet("""
+            QScrollArea {
+                border: none;
+                background-color: transparent;
+            }
+            QScrollBar:vertical {
+                border: none;
+                background: #3c3c3c;
+                width: 10px;
+                margin: 0px;
+            }
+            QScrollBar::handle:vertical {
+                background: #718096;
+                min-height: 20px;
+                border-radius: 5px;
+            }
+        """)
+
+        
+        # Remove the outer margin/padding from the scroll area's content to prevent double borders
+        container_widget.setContentsMargins(0, 0, 0, 0)
+        container_layout.setContentsMargins(10, 10, 10, 10)
+
+
+
         center_layout = QHBoxLayout()
         center_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         # Give the container some breathing room within the center layout
         center_layout.setContentsMargins(20, 0, 20, 0)
-        center_layout.addWidget(container_widget)
-    
+        center_layout.addWidget(scroll_area)
+
         outer_layout.addLayout(center_layout)
         self.setLayout(outer_layout)
     
     def showEvent(self, event):
-        """Centers the wizard window on the screen and sets a standard size."""
+        """Centers the wizard window on the screen."""
         super().showEvent(event)
     
         window = self.window()
         if window is not None:
-            window.setMinimumSize(700, 700)
-            window.resize(700, 700)
-    
             frame = window.frameGeometry()
             center_point = window.screen().availableGeometry().center()
             frame.moveCenter(center_point)
             window.move(frame.topLeft())
+
     
     
     def validatePage(self) -> bool:

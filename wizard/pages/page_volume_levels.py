@@ -8,15 +8,15 @@ from PyQt6.QtWidgets import (
     QRadioButton,
     QComboBox,
     QCheckBox,
+    QScrollArea,
+    QWidget,
 )
 from PyQt6.QtCore import Qt
-
 
 class PageVolumeLevels(QWizardPage):
     def __init__(self, model):
         super().__init__()
         self.setTitle("Define Volume Levels")
-
 
         self.model = model
 
@@ -58,6 +58,14 @@ class PageVolumeLevels(QWizardPage):
         mode_group = QGroupBox("Volume Mode")
         self.radio_relative = QRadioButton("Relative solvent volume (mL solvent / g mixture)")
         self.radio_absolute = QRadioButton("Absolute solvent volume")
+        
+        font = self.radio_relative.font()
+        font.setPointSize(9)
+        self.radio_relative.setFont(font)
+        self.radio_absolute.setFont(font)
+        self.radio_relative.setStyleSheet("font-size: 9pt;")
+        self.radio_absolute.setStyleSheet("font-size: 9pt;")
+
         self.radio_relative.setChecked(True)
 
         mode_layout = QVBoxLayout()
@@ -89,7 +97,6 @@ class PageVolumeLevels(QWizardPage):
                 self.combo_units.setVisible(checked)
             )
         )
-
 
         # ------------------------------
         # Replicates section
@@ -165,10 +172,72 @@ class PageVolumeLevels(QWizardPage):
         layout.addWidget(replicate_group)
         layout.addStretch()
 
-        self.setLayout(layout)
-        # ------------------------------
-        # Window sizing and centering
-        # ------------------------------
+        # Wrap in a scroll area to handle small screens/large lists
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        container_widget = QWidget()
+        container_layout = QVBoxLayout(container_widget)
+        container_layout.setContentsMargins(20, 10, 20, 10)
+        container_layout.setSpacing(0)
+        container_layout.addLayout(layout)
+        scroll_area.setWidget(container_widget)
+
+        scroll_area.setStyleSheet("""
+            QScrollArea {
+                border: 1px solid #444;
+                background-color: #2b2b2b;
+            }
+            QScrollBar:vertical {
+                border: none;
+                background: #3c3c3c;
+                width: 10px;
+                margin: 0px;
+            }
+            QScrollBar::handle:vertical {
+                background: #718096;
+                min-height: 20px;
+                border-radius: 5px;
+            }
+        """)
+
+        # Create a layout for the page and add the scroll area to it
+        center_layout = QHBoxLayout()
+        center_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        center_layout.setContentsMargins(20, 0, 20, 0)
+        center_layout.addWidget(scroll_area)
+
+        outer_layout = QVBoxLayout()
+        outer_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        outer_layout.addLayout(center_layout)
+        self.setLayout(outer_layout)
+
+    def showEvent(self, event):
+            """
+            Ensures the wizard window is centered on the screen and has a 
+            consistent minimum size when first displayed.
+            """
+            super().showEvent(event)
+        
+            wizard = self.wizard()
+            if wizard is not None:
+                # Set standard dimensions for the wizard window
+                wizard.setMinimumSize(600, 500)   # ⭐ critical
+                wizard.resize(750, 550)
+        
+                # Center the window on the user's screen
+                frame = wizard.frameGeometry()
+                center_point = wizard.screen().availableGeometry().center()
+                frame.moveCenter(center_point)
+                wizard.move(frame.topLeft())
+        
+        
+            if wizard is not None:
+            #    wizard.resize(600, 500)   # or your prefer`red size
+        
+                frame = wizard.frameGeometry()
+                center_point = wizard.screen().availableGeometry().center()
+                frame.moveCenter(center_point)
+                wizard.move(frame.topLeft())
 
     def validatePage(self):
         # Replicate percentage (already correct)
@@ -189,10 +258,4 @@ class PageVolumeLevels(QWizardPage):
             self.model.volume_mode = "absolute"
             self.model.volume_unit = self.combo_units.currentText()
 
-        #     print(f"DEBUG: Volume levels list: {self.model.volume_levels}")
-        #     print(f"DEBUG: Volume level count: {self.model.number_of_volume_levels}")
-        #     print(f"DEBUG: Volume mode: {self.model.volume_mode}")
-        #     print(f"DEBUG: Volume unit: {self.model.volume_unit}")
-        #     print(f"DEBUG: Replicate percentage set to: {self.model.replicate_percentage}")
         return True
-
