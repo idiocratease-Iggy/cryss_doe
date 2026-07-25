@@ -36,9 +36,9 @@ class PageComponents(QWizardPage):
         # Input for the number of components (Range: 1-20)
         self.spin = QSpinBox()
         self.spin.setMinimum(1)
-        self.spin.setMaximum(20)  # adjust if you want more
+        self.spin.setMaximum(10)  # adjust if you want more
         self.spin.setValue(3)  # sensible default
-        self.spin.setFixedWidth(60)  # Fix: Set a reasonable fixed width so it doesn't stretch across the screen
+        self.spin.setFixedWidth(80)  # Fix: Set a reasonable fixed width so it doesn't stretch across the screen
         self.spin.valueChanged.connect(self._on_value_changed)
     
     
@@ -63,9 +63,9 @@ class PageComponents(QWizardPage):
         
         self.spin_starting = QSpinBox()
         self.spin_starting.setMinimum(2)
-        self.spin_starting.setMaximum(20)
+        self.spin_starting.setMaximum(10)  # adjust if you want more
         self.spin_starting.setValue(2)
-        self.spin_starting.setFixedWidth(60)
+        self.spin_starting.setFixedWidth(80)
         self.spin_starting.hide()
         
         self.radio_single.toggled.connect(self._update_starting_mix_visibility)

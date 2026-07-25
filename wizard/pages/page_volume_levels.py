@@ -45,8 +45,8 @@ class PageVolumeLevels(QWizardPage):
         self.spin_volumes = QSpinBox()
         self.spin_volumes.setMinimum(1)
         self.spin_volumes.setMaximum(10)
-        self.spin_volumes.setValue(2)
-        self.spin_volumes.setFixedWidth(60)
+        self.spin_volumes.setValue(1)
+        self.spin_volumes.setFixedWidth(80)
 
         volumes_layout = QHBoxLayout()
         volumes_layout.addWidget(volumes_label)
@@ -109,7 +109,7 @@ class PageVolumeLevels(QWizardPage):
         self.spin_replicate_pct.setRange(0, 100)
         self.spin_replicate_pct.setSuffix("%")
         self.spin_replicate_pct.setValue(0)
-        self.spin_replicate_pct.setFixedWidth(60)
+        self.spin_replicate_pct.setFixedWidth(80)
 
         replicate_layout = QHBoxLayout()
         replicate_layout.addWidget(replicate_label)
@@ -210,6 +210,7 @@ class PageVolumeLevels(QWizardPage):
         outer_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         outer_layout.addLayout(center_layout)
         self.setLayout(outer_layout)
+        self.apply_replicate_heuristic()
 
     def showEvent(self, event):
             """
