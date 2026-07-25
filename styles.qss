@@ -42,16 +42,45 @@ QPushButton#write_excel_btn:hover {
 }
 
 /* SpinBox Styling - Fixes the "block blue" issue in EXE */
-QSpinBox {
+QAbstractSpinBox, QSpinBox, QDoubleSpinBox {
     background-color: #2d2d2d;
     border: 1px solid #404040;
-    padding: 5px;
+    padding: 5px 24px 5px 5px;
     color: white;
 }
 
-QSpinBox::up-button, QSpinBox::down-button {
+QSpinBox::up-button, QSpinBox::down-button,
+QDoubleSpinBox::up-button, QDoubleSpinBox::down-button {
+    width: 22px;
+    subcontrol-origin: border;
+}
+
+QSpinBox::up-button {
+    subcontrol-position: top right;
+}
+
+QSpinBox::down-button {
+    subcontrol-position: bottom right;
+}
+
+QDoubleSpinBox::up-button {
+    subcontrol-position: top right;
+}
+
+QDoubleSpinBox::down-button {
+    subcontrol-position: bottom right;
+}
+
+QSpinBox::up-arrow, QDoubleSpinBox::up-arrow {
     width: 16px;
-    border: 1px solid #404040;
+    height: 16px;
+    color: white;
+}
+
+QSpinBox::down-arrow, QDoubleSpinBox::down-arrow {
+    width: 16px;
+    height: 16px;
+    color: white;
 }
 
 /* RadioButton and CheckBox Styling - Unified Look */
