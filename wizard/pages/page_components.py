@@ -101,7 +101,6 @@ class PageComponents(QWizardPage):
         consistent minimum size when first displayed.
         """
         super().showEvent(event)
-    
         wizard = self.wizard()
         if wizard is not None:
             # Set standard dimensions for the wizard window
@@ -122,6 +121,8 @@ class PageComponents(QWizardPage):
             center_point = wizard.screen().availableGeometry().center()
             frame.moveCenter(center_point)
             wizard.move(frame.topLeft())
+
+        
     
     
     def _on_value_changed(self, value: int):

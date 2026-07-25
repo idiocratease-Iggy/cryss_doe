@@ -8,6 +8,8 @@ from wizard.pages.page_pca import PagePCA
 from wizard.pages.page_salt_formers import PageSaltFormers
 from wizard.pages.page_volume_levels import PageVolumeLevels
 from wizard.pages.page_plate_picker import PagePlatePicker
+
+
 from models.descriptor_manager import DescriptorManager
 from models.design_model import DesignModel
 from excel_writer import save_experiments_to_excel
@@ -23,6 +25,7 @@ class DesignWizard(QWizard):
 
         self.setWindowTitle("Mixture-centric DoE Wizard")
         self.setWizardStyle(QWizard.WizardStyle.ModernStyle)
+        self.fill_to_full_plates = False
 
 
         pal = self.palette()
@@ -52,6 +55,7 @@ class DesignWizard(QWizard):
         self.page_salt_formers = PageSaltFormers(self.model)
         self.page_volume_levels = PageVolumeLevels(self.model)
         self.page_plate_picker = PagePlatePicker(self.model)
+       
 
         # Add pages in order
         self.addPage(self.page_components)
@@ -60,6 +64,7 @@ class DesignWizard(QWizard):
         self.addPage(self.page_salt_formers)
         self.addPage(self.page_volume_levels)
         self.addPage(self.page_plate_picker)
+
 
     def accept(self):
         super().accept()

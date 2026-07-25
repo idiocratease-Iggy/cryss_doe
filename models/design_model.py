@@ -8,7 +8,7 @@ class DesignModel:
     Central state container for the entire DoE wizard.
     All pages write their values into this model.
     """
-
+    
     # -----------------------------
     # File paths
     # -----------------------------
