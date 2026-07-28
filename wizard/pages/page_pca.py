@@ -159,6 +159,8 @@ class PagePCA(QWizardPage):
         self.design_model = design_model
         self.selected = set()
         self.preselected = set(design_model.selected_solvents_pca or [])
+        self.pca_model = None
+        self.desc_cols = []
         self.pca_df = pd.DataFrame()
 
         self.setTitle("Explore solvent space using PCA")
@@ -263,14 +265,14 @@ class PagePCA(QWizardPage):
         df = self.design_model.descriptor_df.copy()
         df["Solvent"] = df["Solvent"].apply(normalize)
 
-        # PCA with 3 components (unchanged)
         desc_cols = [c for c in df.columns if c not in ("Solvent",)]
+        self.desc_cols = desc_cols
         X = df[desc_cols].values
         X_scaled = StandardScaler().fit_transform(X)
-
-        pca = PCA(n_components=4)
-        pcs = pca.fit_transform(X_scaled)
-
+        
+        self.pca_model = PCA(n_components=4)
+        pcs = self.pca_model.fit_transform(X_scaled)
+        
         self.pca_df = pd.DataFrame({
             "Solvent": df["Solvent"],
             "PC1": pcs[:, 0],
@@ -278,8 +280,9 @@ class PagePCA(QWizardPage):
             "PC3": pcs[:, 2],
             "PC4": pcs[:, 3],
         })
-
+        
         self.preselected = {normalize(s) for s in self.design_model.selected_solvents_pca}
+
 
         QTimer.singleShot(0, self.update_plot)
 
@@ -368,12 +371,11 @@ class PagePCA(QWizardPage):
     # ---------------------------------------------------------
     # Final selection
     # ---------------------------------------------------------
-    def get_selected_solvents(self):
-        unique_solvents = list(self.selected | self.preselected)
-        no_of_solvents = len(unique_solvents)
-        #     print(f"DEBUG: Number of unique solvents selected in PCA: {no_of_solvents}")
-        self.model.selected_solvents_pca = unique_solvents
-        return unique_solvents
+    def export_pca_loadings(self, output_path: str):
+        if self.pca_model is not None:
+            save_pca_loadings(self.pca_model, self.desc_cols, output_path)
+        else:
+            print("PCA model not initialized.")
 
     def showEvent(self, event):
         super().showEvent(event)
