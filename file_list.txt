@@ -1,0 +1,38 @@
+Folder PATH listing for volume Media
+Volume serial number is 000000F4 222E:5334
+E:.
+¦   excel_writer.py
+¦   experiment_generator.py
+¦   file_list.txt
+¦   main.py
+¦   styles.qss
+¦   
++---data
+¦       Descriptors.xlsx
+¦       SaltFormerList.xlsx
+¦       SolventList.xlsx
+¦       
++---models
+¦       descriptor_manager.py
+¦       design_model.py
+¦       salt_former_manager.py
+¦       solvent_manager.py
+¦       __init__.py
+¦       
++---utils
+¦       paths.py
+¦       __init__.py
+¦       
++---wizard
+    ¦   wizard_controller.py
+    ¦   __init__.py
+    ¦   
+    +---pages
+            page_components.py
+            page_pca.py
+            page_plate_picker.py
+            page_salt_formers.py
+            page_solvent_picker.py
+            page_starting_mixtures.py
+            page_volume_levels.py
+            
