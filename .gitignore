@@ -51,3 +51,8 @@ wizard/__pycache__/
 .build/
 .dist_installer/
 .dist/
+build/
+dist/
+dist_installer/
+*.exe
+*.pkg
