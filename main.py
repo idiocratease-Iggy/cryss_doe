@@ -27,13 +27,16 @@ import os
 
 from utils.paths import resource_path
 
+APP_ICON_PATH = os.path.join("icons", "cryss_doe.ico")
+
+
 def main():
     app = QApplication(sys.argv)
 
     # Determine the correct path to the stylesheet
     # This now correctly handles bundled files via PyInstaller's _MEIPASS
     stylesheet_path = resource_path("styles.qss")
-    icon_path = resource_path("app_icon.ico")
+    icon_path = resource_path(APP_ICON_PATH)
 
     # Ensure the application has a consistent look across different OS
     app.setStyle("Fusion")

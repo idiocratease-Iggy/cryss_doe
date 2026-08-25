@@ -5,7 +5,7 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[('styles.qss', '.'), ('Descriptors.xlsx', '.'), ('SolventList.xlsx', '.'), ('SaltFormerList.xlsx', '.')],
+    datas=[('styles.qss', '.'), ('icons/cryss_doe.ico', 'icons'), ('data/Descriptors.xlsx', 'data'), ('data/SolventList.xlsx', 'data'), ('data/SaltFormerList.xlsx', 'data')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -35,4 +35,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon=['icons/cryss_doe.ico'],
 )
