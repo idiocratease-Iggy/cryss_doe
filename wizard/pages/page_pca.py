@@ -303,8 +303,10 @@ class PagePCA(QWizardPage):
             "PC4": pcs[:, 3],
         })
         
-        self.preselected = {normalize(s) for s in self.design_model.selected_solvents_pca}
-
+        self.preselected = {normalize(s) for s in self.model.selected_solvents}
+        self.selected = {
+            normalize(s) for s in self.model.selected_solvents_pca
+        } - self.preselected
 
         QTimer.singleShot(0, self.update_plot)
 
@@ -320,10 +322,9 @@ class PagePCA(QWizardPage):
         else:
             self.selected.add(solvent)
  
-        # Calculate and print count for debugging
-        unique_solvents = list(self.selected | self.preselected)
-        self.model.selected_solvents_pca = unique_solvents
-        #     print(f"DEBUG: Number of unique solvents selected in PCA: {len(unique_solvents)}")
+        self.model.selected_solvents_pca = list(dict.fromkeys(
+            self.model.selected_solvents + sorted(self.selected)
+        ))
 
         # Determine selected axis
         y_pc = next((i+2 for i, rb in enumerate(self.y_buttons) if rb.isChecked()), 2)
@@ -403,4 +404,3 @@ class PagePCA(QWizardPage):
         super().showEvent(event)
         # Removed hardcoded window resizing to allow other pages to control size.
         # Note: The wizard's initial size is handled by the main window or previous pages.
-
