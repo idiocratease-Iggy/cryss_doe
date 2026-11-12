@@ -55,7 +55,9 @@ def generate_experiments(design) -> list[Experiment]:
     # -----------------------------
     starting_mixtures = range(1, design.number_of_starting_mixtures + 1)
     #     print(f"DEBUG: Starting mixtures count: {len(starting_mixtures)}")
-    solvents = design.selected_solvents              # list of names
+    solvents = list(dict.fromkeys(
+        design.selected_solvents + design.selected_solvents_pca
+    ))
     volumes = design.volume_levels                        # list of floats, e.g. [0.1, 0.2, 0.3]
     #     print(f"DEBUG: Solvents count: {len(solvents)}, content: {solvents}")
     #     print(f"DEBUG: Volumes count: {len(volumes)}, content: {volumes}")
