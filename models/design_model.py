@@ -47,8 +47,8 @@ class DesignModel:
     # -----------------------------
     # User selections
     # -----------------------------
-    selected_solvents: List[str] = field(default_factory=list)
-    selected_solvents_pca: List[str] = field(default_factory=list)
+    selected_solvents: List[str] = field(default_factory=list)  # Curated picker selections
+    selected_solvents_pca: List[str] = field(default_factory=list)  # Picker and PCA selections
     selected_salt_formers: List[str] = field(default_factory=list)
 
     number_of_volume_levels: int = 2
